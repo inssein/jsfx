@@ -1,4 +1,4 @@
-module jsfx {
+namespace jsfx {
   var hasWebGL = (function () {
     try {
       var canvas = document.createElement("canvas");

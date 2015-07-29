@@ -1,4 +1,4 @@
-module jsfx {
+namespace jsfx {
   export class Filter implements jsfx.FilterInterface {
     protected properties : any = {};
     private vertexSource : string;

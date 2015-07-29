@@ -1,4 +1,4 @@
-module jsfx.webgl {
+namespace jsfx.webgl {
   export class Renderer implements jsfx.RendererInterface {
     private static shaderCache : any = {};
 

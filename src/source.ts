@@ -1,4 +1,4 @@
-module jsfx {
+namespace jsfx {
   export class Source {
     private element : HTMLImageElement;
 

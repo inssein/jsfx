@@ -1,4 +1,4 @@
-module jsfx.webgl {
+namespace jsfx.webgl {
   export class Shader {
     private static defaultVertexSource : string = `
 attribute vec2 vertex;

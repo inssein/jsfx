@@ -1,7 +1,7 @@
 declare var Buffer;
 declare var require;
 
-module jsfx.canvas {
+namespace jsfx.canvas {
   export class Renderer implements jsfx.RendererInterface {
     private canvas : HTMLCanvasElement;
     private ctx : CanvasRenderingContext2D;

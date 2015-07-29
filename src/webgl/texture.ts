@@ -1,4 +1,4 @@
-module jsfx.webgl {
+namespace jsfx.webgl {
   export class Texture {
     private gl : WebGLRenderingContext;
     private id : WebGLTexture;

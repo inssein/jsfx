@@ -1,4 +1,4 @@
-module jsfx {
+namespace jsfx {
   export interface RendererInterface {
     setSource(source : jsfx.Source) : RendererInterface;
     applyFilter(filter : jsfx.FilterInterface) : RendererInterface;
