@@ -1,21 +1,21 @@
 namespace jsfx {
   export class Source {
-    private element : HTMLImageElement;
+    private _element : HTMLImageElement;
 
     constructor(element : HTMLImageElement) {
-      this.element = element;
+      this._element = element;
     }
 
-    public getElement() : HTMLImageElement {
-      return this.element;
+    public get element() : HTMLImageElement {
+      return this._element;
     }
 
-    public getWidth() : number {
-      return this.element.width;
+    public get width() : number {
+      return this._element.width;
     }
 
-    public getHeight() : number {
-      return this.element.height;
+    public get height() : number {
+      return this._element.height;
     }
   }
 }

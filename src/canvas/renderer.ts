@@ -23,14 +23,14 @@ namespace jsfx.canvas {
 
       // re-set data and start rendering
       this.source = source;
-      this.canvas.width = source.getWidth();
-      this.canvas.height = source.getHeight();
+      this.canvas.width = source.width;
+      this.canvas.height = source.height;
 
       // draw the image on to a canvas we can manipulate
-      this.ctx.drawImage(source.getElement(), 0, 0, source.getWidth(), source.getHeight());
+      this.ctx.drawImage(source.element, 0, 0, source.width, source.height);
 
       // store the pixels
-      this.imageData = this.ctx.getImageData(0, 0, source.getWidth(), source.getHeight());
+      this.imageData = this.ctx.getImageData(0, 0, source.width, source.height);
 
       return this;
     }

@@ -31,7 +31,7 @@ namespace jsfx.webgl {
 
       // re-initialize renderer for rendering with new source
       this.source = source;
-      this.sourceTexture = jsfx.webgl.Texture.fromElement(this.gl, source.getElement());
+      this.sourceTexture = jsfx.webgl.Texture.fromElement(this.gl, source.element);
 
       // initialize the renderer textures
       this.initialize();
@@ -67,7 +67,7 @@ namespace jsfx.webgl {
     }
 
     createTexture() : jsfx.webgl.Texture {
-      return new jsfx.webgl.Texture(this.gl, this.source.getWidth(), this.source.getHeight(), this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+      return new jsfx.webgl.Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
 
     getShader(filter : jsfx.FilterInterface) : jsfx.webgl.Shader {
@@ -102,8 +102,8 @@ namespace jsfx.webgl {
     }
 
     private initialize() : void {
-      this.canvas.width = this.source.getWidth();
-      this.canvas.height = this.source.getHeight();
+      this.canvas.width = this.source.width;
+      this.canvas.height = this.source.height;
 
       // initialize the textures
       var textures = [];
