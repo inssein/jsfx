@@ -41,7 +41,8 @@ gulp.task('compile:typescript', function() {
     .src(paths.tscripts.src)
     .pipe(tsc({
       module: "commonjs",
-      out:    "jsfx.js"
+      out:    "jsfx.js",
+      target: "ES5"
     }))
     .pipe(gulp.dest(paths.tscripts.dest));
 });
