@@ -1,6 +1,21 @@
 (function() {
   "use strict";
 
+  // from three.js
+  var hasWebGL = (function() {
+    try {
+      var canvas = document.createElement('canvas');
+      return !!( window.WebGLRenderingContext && ( canvas.getContext('webgl') || canvas.getContext('experimental-webgl') ) );
+    } catch (e) {
+      return false;
+    }
+  })();
+
+  // let user know if webgl is disable
+  if (!hasWebGL) {
+    $("#webgl").parent().find(".caption").text("WebGL - Disabled (Not Available)")
+  }
+
   ///////////////////////////////////////////////////////////////////////
   // Define Filter Object                                              //
   //  -> Idea stolen from http://evanw.github.io/glfx.js/media/demo.js //
@@ -40,7 +55,7 @@
   // Initialize Renderers //
   //////////////////////////
   var renderers = {
-    webgl:  new jsfx.Renderer('webgl'),
+    webgl:  hasWebGL ? new jsfx.Renderer('webgl') : null,
     canvas: new jsfx.Renderer('canvas')
   };
 
@@ -64,11 +79,16 @@
     Object.keys(renderers).forEach(function(type) {
       var renderer = renderers[type];
 
+      if (!renderer) {
+        // skip if webgl is not available
+        return;
+      }
+
       // ensure source
       renderer.setSource(source);
 
       // set the filter properties
-      for(var i = 0; i < filter.sliders.length; i++) {
+      for (var i = 0; i < filter.sliders.length; i++) {
         var slider = filter.sliders[i];
         filter[slider.name] = parseFloat($("#" + slider.name).val());
       }
@@ -125,7 +145,7 @@
     $properties.empty();
 
     // add sliders
-    for(var i = 0; i < filter.sliders.length; i++) {
+    for (var i = 0; i < filter.sliders.length; i++) {
       $properties.append(generateRow(filter.sliders[i]));
     }
   }
