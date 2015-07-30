@@ -8,7 +8,8 @@
     <title>jsfx</title>
 
     <!-- font -->
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400|Open+Sans:300,400,600|Roboto|Roboto+Condensed|Lato' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400|Open+Sans:300,400,600|Roboto|Roboto+Condensed|Lato'
+          rel='stylesheet' type='text/css'>
 
     <!-- css -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
@@ -24,12 +25,81 @@
 
 <header>
     <div class="container">
-        <a class="site-title" href="#">jsfx</a>
+        <a class="site-title" href="">jsfx</a>
     </div>
 </header>
 
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Introduction</h2>
+        </div>
+        <div class="col-lg-12">
+            <p>An image effects library, heavily inspired by <a href="https://github.com/evanw/glfx.js">glfx.js</a>. The goal of this library is to provide real-time image effects that work in all environments (webgl, canvas, node-canvas).</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Demo</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="filter" class="col-sm-1 control-label">Filter</label>
+
+                    <div class="col-sm-3">
+                        <select id="filter" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div id="properties"></div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <canvas id="webgl" width="555" height="416" style="border: 1px solid;"></canvas>
+        </div>
+        <div class="col-lg-6">
+            <canvas id="canvas" width="555" height="416" style="border: 1px solid;"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Sample</h2>
+        </div>
+        <div class="col-lg-12">
+            <script src="//gist.github.com/inssein/94425ba09002defb61ec.js"></script>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Credits</h2>
+        </div>
+        <div class="col-lg-12">
+            <ul>
+                <li><a href="http://evanw.github.io/glfx.js">glfx.js</a> for everything webgl related</li>
+                <li><a href="http://www.flickr.com/photos/matthigh/2125630879/">matthigh</a> for the image used in the demo.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
 <!-- javascript -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//cdn.rawgit.com/inssein/jsfx/40cf1bb9150c8ce12201739d4401638b9fdc5f3a/build/jsfx.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

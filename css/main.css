@@ -19,3 +19,7 @@ header a.site-title {
 header a.site-title:hover {
     text-decoration: none;
 }
+
+.form-horizontal .control-label {
+    text-align: left;
+}
