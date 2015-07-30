@@ -21,16 +21,13 @@ void main() {
     private static vertexBuffer : WebGLBuffer;
     private static texCoordBuffer : WebGLBuffer;
 
-    private gl : WebGLRenderingContext;
     private vertexSource : string;
     private fragmentSource : string;
     private vertexAttribute : any;
     private texCoordAttribute : any;
     private program : WebGLProgram;
 
-    constructor(gl : WebGLRenderingContext, vertexSource? : string, fragmentSource? : string) {
-      this.gl = gl;
-
+    constructor(private gl : WebGLRenderingContext, vertexSource? : string, fragmentSource? : string) {
       // get the shader source
       this.vertexSource = vertexSource || Shader.defaultVertexSource;
       this.fragmentSource = fragmentSource || Shader.defaultFragmentSource;

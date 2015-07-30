@@ -1,22 +1,12 @@
 namespace jsfx.webgl {
   export class Texture {
-    private gl : WebGLRenderingContext;
     private id : WebGLTexture;
-    private width : number;
-    private height : number;
-    private format : any;
-    private type : any;
     private element : HTMLImageElement;
 
     private static frameBuffer : WebGLFramebuffer;
 
-    constructor(gl : WebGLRenderingContext, width : number, height : number, format ? : any, type ? : any) {
-      this.gl = gl;
+    constructor(private gl : WebGLRenderingContext, private width : number, private height : number, private format ? : any, private type ? : any) {
       this.id = gl.createTexture();
-      this.width = width;
-      this.height = height;
-      this.format = format || gl.RGBA;
-      this.type = type || gl.UNSIGNED_BYTE;
       this.element = null;
 
       gl.bindTexture(gl.TEXTURE_2D, this.id);

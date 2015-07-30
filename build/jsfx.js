@@ -75,25 +75,18 @@ var jsfx;
 (function (jsfx) {
     var Source = (function () {
         function Source(element) {
-            this._element = element;
+            this.element = element;
         }
-        Object.defineProperty(Source.prototype, "element", {
-            get: function () {
-                return this._element;
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(Source.prototype, "width", {
             get: function () {
-                return this._element.width;
+                return this.element.width;
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Source.prototype, "height", {
             get: function () {
-                return this._element.height;
+                return this.element.height;
             },
             enumerable: true,
             configurable: true
@@ -590,11 +583,11 @@ var jsfx;
         var Texture = (function () {
             function Texture(gl, width, height, format, type) {
                 this.gl = gl;
-                this.id = gl.createTexture();
                 this.width = width;
                 this.height = height;
-                this.format = format || gl.RGBA;
-                this.type = type || gl.UNSIGNED_BYTE;
+                this.format = format;
+                this.type = type;
+                this.id = gl.createTexture();
                 this.element = null;
                 gl.bindTexture(gl.TEXTURE_2D, this.id);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
