@@ -81,11 +81,16 @@
 
       // show results
       var canvas = document.getElementById(type);
+      var $container = $(canvas).parent();
       var context = canvas.getContext('2d');
-      var scale = zoomToFit(source.width, source.height, canvas.width, canvas.height);
+      var scale = zoomToFit(source.width, source.height, $container.width(), 416);
+
+      // set the canvas size
+      canvas.width = source.width * scale;
+      canvas.height = source.height * scale;
 
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(renderer.getCanvas(), 0, 0, source.width, source.height, 0, 0, source.width * scale, source.height * scale);
+      context.drawImage(renderer.getCanvas(), 0, 0, source.width, source.height, 0, 0, canvas.width, canvas.height);
     });
   }
 
