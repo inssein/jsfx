@@ -48,7 +48,18 @@
       },
       function(renderer) {
         renderer.applyFilter(new jsfx.filter.BrightnessContrast(this.brightness, this.contrast));
-      })
+      }
+    ),
+    new Filter(
+      'Hue / Saturation',
+      function() {
+        this.addSlider('hue', 'Hue', -1, 1, 0, 0.01);
+        this.addSlider('saturation', 'Saturation', -1, 1, 0, 0.01);
+      },
+      function(renderer) {
+        renderer.applyFilter(new jsfx.filter.HueSaturation(this.hue, this.saturation));
+      }
+    )
   ];
 
   //////////////////////////
