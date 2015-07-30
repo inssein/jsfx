@@ -1,6 +1,8 @@
 # jsfx
 
-A real time WebGL image effects library, heavily inspired by https://github.com/evanw/glfx.js. I needed something that could fallback to a canvas, and additionally, I needed the same effects to render server side.
+A real-time image effects library, heavily inspired by https://github.com/evanw/glfx.js. I needed something that could fallback to a canvas, and additionally, I needed the same effects to render server side.
+
+Demo: https://jsfx.inssein.com
 
 # todo
 

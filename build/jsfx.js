@@ -178,20 +178,33 @@ var jsfx;
             }
             BrightnessContrast.prototype.drawCanvas = function (imageData) {
                 var pixels = imageData.data;
-                var brightness = this.properties.brightness * 255;
-                var contrast = this.properties.contrast * 255;
-                // the contrast is applied slightly differently than the webgl variant, mostly because since webGL uses
-                // 0's and 1's, the math becomes different when multiplying / dividing.
-                var factor = (255 * (contrast + 255)) / (255 * (255 - contrast));
+                var brightness = this.properties.brightness;
+                var contrast = this.properties.contrast;
+                var r, g, b;
                 for (var i = 0; i < pixels.length; i += 4) {
+                    // get color values
+                    r = pixels[i] / 255;
+                    g = pixels[i + 1] / 255;
+                    b = pixels[i + 2] / 255;
                     // apply brightness
-                    pixels[i] += brightness;
-                    pixels[i + 1] += brightness;
-                    pixels[i + 2] += brightness;
+                    r += brightness;
+                    g += brightness;
+                    b += brightness;
                     // apply contrast
-                    pixels[i] = factor * (pixels[i] - 128) + 128;
-                    pixels[i + 1] = factor * (pixels[i + 1] - 128) + 128;
-                    pixels[i + 2] = factor * (pixels[i + 2] - 128) + 128;
+                    if (contrast > 0) {
+                        r = (r - 0.5) / (1 - contrast) + 0.5;
+                        g = (g - 0.5) / (1 - contrast) + 0.5;
+                        b = (b - 0.5) / (1 - contrast) + 0.5;
+                    }
+                    else {
+                        r = (r - 0.5) * (1 + contrast) + 0.5;
+                        g = (g - 0.5) * (1 + contrast) + 0.5;
+                        b = (b - 0.5) * (1 + contrast) + 0.5;
+                    }
+                    // set color values
+                    pixels[i] = r * 255;
+                    pixels[i + 1] = g * 255;
+                    pixels[i + 2] = b * 255;
                 }
                 return imageData;
             };
