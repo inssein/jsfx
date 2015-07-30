@@ -2,9 +2,11 @@ var jsfx;
 (function (jsfx) {
     var Filter = (function () {
         function Filter(vertexSource, fragmentSource) {
+            if (vertexSource === void 0) { vertexSource = null; }
+            if (fragmentSource === void 0) { fragmentSource = null; }
+            this.vertexSource = vertexSource;
+            this.fragmentSource = fragmentSource;
             this.properties = {};
-            this.vertexSource = vertexSource || null;
-            this.fragmentSource = fragmentSource || null;
         }
         /**
          * Returns all the properties of the shader. Useful for drawWebGl when are are just passing along data
@@ -582,6 +584,8 @@ var jsfx;
     (function (webgl) {
         var Texture = (function () {
             function Texture(gl, width, height, format, type) {
+                if (format === void 0) { format = gl.RGBA; }
+                if (type === void 0) { type = gl.UNSIGNED_BYTE; }
                 this.gl = gl;
                 this.width = width;
                 this.height = height;

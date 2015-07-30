@@ -1,12 +1,8 @@
 namespace jsfx {
   export class Filter implements jsfx.FilterInterface {
     protected properties : any = {};
-    private vertexSource : string;
-    private fragmentSource : string;
 
-    constructor(vertexSource ? : string, fragmentSource ? : string) {
-      this.vertexSource = vertexSource || null;
-      this.fragmentSource = fragmentSource || null;
+    constructor(private vertexSource : string = null, private fragmentSource : string = null) {
     }
 
     /**

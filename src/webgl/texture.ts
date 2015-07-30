@@ -5,7 +5,7 @@ namespace jsfx.webgl {
 
     private static frameBuffer : WebGLFramebuffer;
 
-    constructor(private gl : WebGLRenderingContext, private width : number, private height : number, private format ? : any, private type ? : any) {
+    constructor(private gl : WebGLRenderingContext, private width : number, private height : number, private format : number = gl.RGBA, private type : number = gl.UNSIGNED_BYTE) {
       this.id = gl.createTexture();
       this.element = null;
 
