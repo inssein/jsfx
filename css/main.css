@@ -1,3 +1,7 @@
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
 header {
     border-bottom: 1px solid #e8e8e8;
     min-height: 120px;
@@ -6,7 +10,6 @@ header {
 
 header a.site-title {
     color: #f4645f;
-    font-family: 'Source Sans Pro', sans-serif;
     font-weight: 400;
     line-height: 115px;
     font-size: 36px;
@@ -14,6 +17,11 @@ header a.site-title {
     margin-bottom: 0;
     float: left;
     text-decoration: none;
+}
+
+header .buttons {
+    float: right;
+    line-height: 115px;
 }
 
 header a.site-title:hover {
