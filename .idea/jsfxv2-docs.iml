@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="respond" level="application" />
+    <orderEntry type="library" name="jsfx" level="application" />
+    <orderEntry type="library" name="94425ba09002defb61ec" level="application" />
+  </component>
+</module>

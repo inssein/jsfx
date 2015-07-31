@@ -55,6 +55,17 @@
         <div class="col-lg-12">
             <form class="form-horizontal">
                 <div class="form-group">
+                    <label class="col-sm-1 control-label">Renderer(s)</label>
+                    <div id="renderers" class="col-sm-3">
+                        <div class="checkbox">
+                            <label><input id="webgl" type="checkbox" checked="checked"> WebGL</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input id="canvas" type="checkbox" checked="checked"> Canvas</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="filter" class="col-sm-1 control-label">Filter</label>
 
                     <div class="col-sm-3">
@@ -66,20 +77,7 @@
             </form>
         </div>
     </div>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="thumbnail">
-                <canvas id="canvas" class="img-rounded img-responsive"></canvas>
-                <div class="caption">Canvas</div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="thumbnail">
-                <canvas id="webgl" class="img-rounded img-responsive"></canvas>
-                <div class="caption">WebGL</div>
-            </div>
-
-        </div>
+    <div id="canvases" class="row">
     </div>
 </div>
 
@@ -108,10 +106,11 @@
     </div>
 </div>
 
-
 <!-- javascript -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="//rawgit.com/inssein/jsfx/master/build/jsfx.js"></script>
+<script src="js/filter.js"></script>
+<script src="js/filters.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
