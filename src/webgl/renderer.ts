@@ -1,7 +1,5 @@
 namespace jsfx.webgl {
   export class Renderer implements jsfx.RendererInterface {
-    private static shaderCache : any = {};
-
     private canvas : HTMLCanvasElement;
     private gl : WebGLRenderingContext;
     private source : jsfx.Source;
@@ -21,6 +19,9 @@ namespace jsfx.webgl {
       // store the textures and buffers
       this.textures = null;
       this.currentTexture = 0;
+
+      // initialize a shader cache
+      (<any>this.gl).shaderCache = {};
     }
 
     public setSource(source : jsfx.Source) : jsfx.RendererInterface {
@@ -47,52 +48,52 @@ namespace jsfx.webgl {
       return this.source;
     }
 
-    applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
+    public applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
       filter.drawWebGL(this);
 
       return this;
     }
 
-    render() {
+    public render() {
       this.getTexture().use();
       this.getFlippedShader().drawRect();
     }
 
-    getCanvas() : HTMLCanvasElement {
+    public getCanvas() : HTMLCanvasElement {
       return this.canvas;
     }
 
-    getTexture() : jsfx.webgl.Texture {
+    public getTexture() : jsfx.webgl.Texture {
       return this.textures[this.currentTexture % 2];
     }
 
-    getNextTexture() : jsfx.webgl.Texture {
+    public getNextTexture() : jsfx.webgl.Texture {
       return this.textures[++this.currentTexture % 2];
     }
 
-    createTexture() : jsfx.webgl.Texture {
+    public createTexture() : jsfx.webgl.Texture {
       return new jsfx.webgl.Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
 
-    getShader(filter : jsfx.FilterInterface) : jsfx.webgl.Shader {
+    public getShader(filter : jsfx.FilterInterface) : jsfx.webgl.Shader {
       var cacheKey = filter.getVertexSource() + filter.getFragmentSource();
 
-      return Renderer.shaderCache.hasOwnProperty(cacheKey) ?
-        Renderer.shaderCache[cacheKey] :
+      return (<any>this.gl).shaderCache.hasOwnProperty(cacheKey) ?
+        (<any>this.gl).shaderCache[cacheKey] :
         new jsfx.webgl.Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
     }
 
-    getDefaultShader() : jsfx.webgl.Shader {
-      if (!Renderer.shaderCache.default) {
-        Renderer.shaderCache.default = new jsfx.webgl.Shader(this.gl);
+    public getDefaultShader() : jsfx.webgl.Shader {
+      if ((<any>this.gl).shaderCache.def) {
+        (<any>this.gl).shaderCache.def = new jsfx.webgl.Shader(this.gl);
       }
 
-      return Renderer.shaderCache.default;
+      return (<any>this.gl).shaderCache.def;
     }
 
-    getFlippedShader() : jsfx.webgl.Shader {
-      if (!Renderer.shaderCache.flipped) {
-        Renderer.shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, `
+    public getFlippedShader() : jsfx.webgl.Shader {
+      if ((<any>this.gl).shaderCache.flipped) {
+        (<any>this.gl).shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, `
                 uniform sampler2D texture;
                 varying vec2 texCoord;
 
@@ -102,7 +103,7 @@ namespace jsfx.webgl {
             `);
       }
 
-      return Renderer.shaderCache.flipped;
+      return (<any>this.gl).shaderCache.flipped;
     }
 
     private initialize() : void {
