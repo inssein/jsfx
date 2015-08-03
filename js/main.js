@@ -47,7 +47,13 @@
   // Setup Renderers //
   /////////////////////
   $renderers
-    .change(renderCanvases)
+    .change(function() {
+      renderCanvases();
+
+      if (source) {
+        renderEffects(currentFilter);
+      }
+    })
     .trigger('change');
 
   ///////////////////
