@@ -12,6 +12,7 @@ Demo: https://jsfx.inssein.com
 * Think of a way to apply all the canvas filters in one loop of ImageData, instead of looping n times (n = number of filters). If this works, we should break up the BrightnessContrast and HueSaturation filters into separate filters.
 * A lot of the filter files have the comments and the webgl shaders copied from glfx.js. I should probably attribute the single files as well as mentioning it in the credits.
 * Add tests
+* Test server side rendering with node-canvas, and add documentation
 
 
 # credits
