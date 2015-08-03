@@ -722,6 +722,132 @@ var jsfx;
 })(jsfx || (jsfx = {}));
 var jsfx;
 (function (jsfx) {
+    var util;
+    (function (util) {
+        /**
+         * From SplineInterpolator.cs in the Paint.NET source code
+         */
+        var SplineInterpolator = (function () {
+            function SplineInterpolator(points) {
+                this.points = points;
+                var n = points.length;
+                var i;
+                this.xa = [];
+                this.ya = [];
+                this.u = [];
+                this.y2 = [];
+                points.sort(function (a, b) {
+                    return a[0] - b[0];
+                });
+                for (i = 0; i < n; i++) {
+                    this.xa.push(points[i][0]);
+                    this.ya.push(points[i][1]);
+                }
+                this.u[0] = 0;
+                this.y2[0] = 0;
+                for (i = 1; i < n - 1; ++i) {
+                    // This is the decomposition loop of the tri-diagonal algorithm.
+                    // y2 and u are used for temporary storage of the decomposed factors.
+                    var wx = this.xa[i + 1] - this.xa[i - 1];
+                    var sig = (this.xa[i] - this.xa[i - 1]) / wx;
+                    var p = sig * this.y2[i - 1] + 2.0;
+                    this.y2[i] = (sig - 1.0) / p;
+                    var ddydx = (this.ya[i + 1] - this.ya[i]) / (this.xa[i + 1] - this.xa[i]) -
+                        (this.ya[i] - this.ya[i - 1]) / (this.xa[i] - this.xa[i - 1]);
+                    this.u[i] = (6.0 * ddydx / wx - sig * this.u[i - 1]) / p;
+                }
+                this.y2[n - 1] = 0;
+                // This is the back-substitution loop of the tri-diagonal algorithm
+                for (i = n - 2; i >= 0; --i) {
+                    this.y2[i] = this.y2[i] * this.y2[i + 1] + this.u[i];
+                }
+            }
+            SplineInterpolator.prototype.interpolate = function (x) {
+                var n = this.ya.length;
+                var klo = 0;
+                var khi = n - 1;
+                // We will find the right place in the table by means of
+                // bisection. This is optimal if sequential calls to this
+                // routine are at random values of x. If sequential calls
+                // are in order, and closely spaced, one would do better
+                // to store previous values of klo and khi.
+                while (khi - klo > 1) {
+                    var k = (khi + klo) >> 1;
+                    if (this.xa[k] > x) {
+                        khi = k;
+                    }
+                    else {
+                        klo = k;
+                    }
+                }
+                var h = this.xa[khi] - this.xa[klo];
+                var a = (this.xa[khi] - x) / h;
+                var b = (x - this.xa[klo]) / h;
+                // Cubic spline polynomial is now evaluated.
+                return a * this.ya[klo] + b * this.ya[khi] +
+                    ((a * a * a - a) * this.y2[klo] + (b * b * b - b) * this.y2[khi]) * (h * h) / 6.0;
+            };
+            return SplineInterpolator;
+        })();
+        util.SplineInterpolator = SplineInterpolator;
+    })(util = jsfx.util || (jsfx.util = {}));
+})(jsfx || (jsfx = {}));
+/**
+ * Vector3 Utility Class
+ *  -> Taken from https://github.com/mrdoob/three.js/blob/master/src/math/Vector3.js with only the functions we need.
+ */
+var jsfx;
+(function (jsfx) {
+    var util;
+    (function (util) {
+        var Vector3 = (function () {
+            function Vector3(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+            Vector3.prototype.addScalar = function (s) {
+                this.x += s;
+                this.y += s;
+                this.z += s;
+                return this;
+            };
+            Vector3.prototype.multiplyScalar = function (s) {
+                this.x *= s;
+                this.y *= s;
+                this.z *= s;
+                return this;
+            };
+            Vector3.prototype.divideScalar = function (s) {
+                if (s !== 0) {
+                    var invScalar = 1 / s;
+                    this.x *= invScalar;
+                    this.y *= invScalar;
+                    this.z *= invScalar;
+                }
+                else {
+                    this.x = 0;
+                    this.y = 0;
+                    this.z = 0;
+                }
+                return this;
+            };
+            Vector3.prototype.length = function () {
+                return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+            };
+            Vector3.prototype.dot = function (v) {
+                return this.x * v.x + this.y * v.y + this.z * v.z;
+            };
+            Vector3.prototype.dotScalars = function (x, y, z) {
+                return this.x * x + this.y * y + this.z * z;
+            };
+            return Vector3;
+        })();
+        util.Vector3 = Vector3;
+    })(util = jsfx.util || (jsfx.util = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
     var webgl;
     (function (webgl) {
         var Renderer = (function () {
@@ -783,13 +909,13 @@ var jsfx;
                     new jsfx.webgl.Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
             };
             Renderer.prototype.getDefaultShader = function () {
-                if (this.gl.shaderCache.def) {
+                if (!this.gl.shaderCache.def) {
                     this.gl.shaderCache.def = new jsfx.webgl.Shader(this.gl);
                 }
                 return this.gl.shaderCache.def;
             };
             Renderer.prototype.getFlippedShader = function () {
-                if (this.gl.shaderCache.flipped) {
+                if (!this.gl.shaderCache.flipped) {
                     this.gl.shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, "\n                uniform sampler2D texture;\n                varying vec2 texCoord;\n\n                void main() {\n                    gl_FragColor = texture2D(texture, vec2(texCoord.x, 1.0 - texCoord.y));\n                }\n            ");
                 }
                 return this.gl.shaderCache.flipped;
@@ -1041,130 +1167,4 @@ var jsfx;
         })();
         webgl.Texture = Texture;
     })(webgl = jsfx.webgl || (jsfx.webgl = {}));
-})(jsfx || (jsfx = {}));
-var jsfx;
-(function (jsfx) {
-    var util;
-    (function (util) {
-        /**
-         * From SplineInterpolator.cs in the Paint.NET source code
-         */
-        var SplineInterpolator = (function () {
-            function SplineInterpolator(points) {
-                this.points = points;
-                var n = points.length;
-                var i;
-                this.xa = [];
-                this.ya = [];
-                this.u = [];
-                this.y2 = [];
-                points.sort(function (a, b) {
-                    return a[0] - b[0];
-                });
-                for (i = 0; i < n; i++) {
-                    this.xa.push(points[i][0]);
-                    this.ya.push(points[i][1]);
-                }
-                this.u[0] = 0;
-                this.y2[0] = 0;
-                for (i = 1; i < n - 1; ++i) {
-                    // This is the decomposition loop of the tri-diagonal algorithm.
-                    // y2 and u are used for temporary storage of the decomposed factors.
-                    var wx = this.xa[i + 1] - this.xa[i - 1];
-                    var sig = (this.xa[i] - this.xa[i - 1]) / wx;
-                    var p = sig * this.y2[i - 1] + 2.0;
-                    this.y2[i] = (sig - 1.0) / p;
-                    var ddydx = (this.ya[i + 1] - this.ya[i]) / (this.xa[i + 1] - this.xa[i]) -
-                        (this.ya[i] - this.ya[i - 1]) / (this.xa[i] - this.xa[i - 1]);
-                    this.u[i] = (6.0 * ddydx / wx - sig * this.u[i - 1]) / p;
-                }
-                this.y2[n - 1] = 0;
-                // This is the back-substitution loop of the tri-diagonal algorithm
-                for (i = n - 2; i >= 0; --i) {
-                    this.y2[i] = this.y2[i] * this.y2[i + 1] + this.u[i];
-                }
-            }
-            SplineInterpolator.prototype.interpolate = function (x) {
-                var n = this.ya.length;
-                var klo = 0;
-                var khi = n - 1;
-                // We will find the right place in the table by means of
-                // bisection. This is optimal if sequential calls to this
-                // routine are at random values of x. If sequential calls
-                // are in order, and closely spaced, one would do better
-                // to store previous values of klo and khi.
-                while (khi - klo > 1) {
-                    var k = (khi + klo) >> 1;
-                    if (this.xa[k] > x) {
-                        khi = k;
-                    }
-                    else {
-                        klo = k;
-                    }
-                }
-                var h = this.xa[khi] - this.xa[klo];
-                var a = (this.xa[khi] - x) / h;
-                var b = (x - this.xa[klo]) / h;
-                // Cubic spline polynomial is now evaluated.
-                return a * this.ya[klo] + b * this.ya[khi] +
-                    ((a * a * a - a) * this.y2[klo] + (b * b * b - b) * this.y2[khi]) * (h * h) / 6.0;
-            };
-            return SplineInterpolator;
-        })();
-        util.SplineInterpolator = SplineInterpolator;
-    })(util = jsfx.util || (jsfx.util = {}));
-})(jsfx || (jsfx = {}));
-/**
- * Vector3 Utility Class
- *  -> Taken from https://github.com/mrdoob/three.js/blob/master/src/math/Vector3.js with only the functions we need.
- */
-var jsfx;
-(function (jsfx) {
-    var util;
-    (function (util) {
-        var Vector3 = (function () {
-            function Vector3(x, y, z) {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-            Vector3.prototype.addScalar = function (s) {
-                this.x += s;
-                this.y += s;
-                this.z += s;
-                return this;
-            };
-            Vector3.prototype.multiplyScalar = function (s) {
-                this.x *= s;
-                this.y *= s;
-                this.z *= s;
-                return this;
-            };
-            Vector3.prototype.divideScalar = function (s) {
-                if (s !== 0) {
-                    var invScalar = 1 / s;
-                    this.x *= invScalar;
-                    this.y *= invScalar;
-                    this.z *= invScalar;
-                }
-                else {
-                    this.x = 0;
-                    this.y = 0;
-                    this.z = 0;
-                }
-                return this;
-            };
-            Vector3.prototype.length = function () {
-                return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-            };
-            Vector3.prototype.dot = function (v) {
-                return this.x * v.x + this.y * v.y + this.z * v.z;
-            };
-            Vector3.prototype.dotScalars = function (x, y, z) {
-                return this.x * x + this.y * y + this.z * z;
-            };
-            return Vector3;
-        })();
-        util.Vector3 = Vector3;
-    })(util = jsfx.util || (jsfx.util = {}));
 })(jsfx || (jsfx = {}));
