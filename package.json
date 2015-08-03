@@ -6,7 +6,7 @@
   },
   "version": "0.0.1",
   "author": "",
-  "main": "build/index.js",
+  "main": "build/jsfx.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.6.2",
