@@ -54,6 +54,14 @@ namespace jsfx.webgl {
       return this;
     }
 
+    public applyFilters(filters : jsfx.FilterInterface[]) : jsfx.RendererInterface {
+      filters.forEach((filter : jsfx.FilterInterface) => {
+        filter.drawWebGL(this);
+      });
+
+      return this;
+    }
+
     public render() {
       this.getTexture().use();
       this.getFlippedShader().drawRect();

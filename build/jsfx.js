@@ -51,6 +51,40 @@ var jsfx;
     })();
     jsfx.Filter = Filter;
 })(jsfx || (jsfx = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var jsfx;
+(function (jsfx) {
+    var IterableFilter = (function (_super) {
+        __extends(IterableFilter, _super);
+        function IterableFilter() {
+            _super.apply(this, arguments);
+        }
+        IterableFilter.prototype.drawCanvas = function (imageData) {
+            return IterableFilter.drawCanvas([this], imageData);
+        };
+        IterableFilter.prototype.iterateCanvas = function (imageData) {
+            throw new Error("Must be implemented");
+        };
+        IterableFilter.drawCanvas = function (filters, imageData) {
+            var helper;
+            for (var i = 0; i < imageData.data.length; i += 4) {
+                helper = new jsfx.util.ImageDataHelper(imageData, i);
+                for (var j = 0; j < filters.length; j++) {
+                    filters[j].iterateCanvas(helper);
+                }
+                helper.save();
+            }
+            return imageData;
+        };
+        return IterableFilter;
+    })(jsfx.Filter);
+    jsfx.IterableFilter = IterableFilter;
+})(jsfx || (jsfx = {}));
 var jsfx;
 (function (jsfx) {
     var hasWebGL = (function () {
@@ -103,7 +137,7 @@ var jsfx;
     (function (canvas) {
         var Renderer = (function () {
             function Renderer() {
-                this.canvas = this.createCanvas();
+                this.canvas = jsfx.canvas.Renderer.createCanvas();
                 this.ctx = this.canvas.getContext("2d");
                 this.source = null;
                 this.imageData = null;
@@ -130,6 +164,34 @@ var jsfx;
                 this.imageData = filter.drawCanvas(this.imageData);
                 return this;
             };
+            Renderer.prototype.applyFilters = function (filters) {
+                var stack = [];
+                var filter;
+                for (var i = 0; i < filters.length; i++) {
+                    filter = filters[i];
+                    if (filter instanceof jsfx.IterableFilter) {
+                        stack.push(filter);
+                    }
+                    else {
+                        // if there if something in the stack, apply that first
+                        if (stack.length > 0) {
+                            this.applyFilterStack(stack);
+                            stack = [];
+                        }
+                        // apply current filter
+                        this.applyFilter(filter);
+                    }
+                }
+                // if there is still a stack left, apply it
+                if (stack.length > 0) {
+                    this.applyFilterStack(stack);
+                }
+                return this;
+            };
+            Renderer.prototype.applyFilterStack = function (stack) {
+                this.imageData = jsfx.IterableFilter.drawCanvas(stack, this.imageData);
+                return this;
+            };
             Renderer.prototype.render = function () {
                 this.ctx.putImageData(this.imageData, 0, 0);
             };
@@ -140,7 +202,7 @@ var jsfx;
                 this.imageData = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             };
-            Renderer.prototype.createCanvas = function () {
+            Renderer.createCanvas = function () {
                 return typeof Buffer !== "undefined" && typeof window === "undefined" ?
                     new (require("canvas"))(100, 100) :
                     document.createElement("canvas");
@@ -150,12 +212,6 @@ var jsfx;
         canvas.Renderer = Renderer;
     })(canvas = jsfx.canvas || (jsfx.canvas = {}));
 })(jsfx || (jsfx = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 var jsfx;
 (function (jsfx) {
     var filter;
@@ -416,54 +472,60 @@ var jsfx;
     var filter;
     (function (filter) {
         /**
-         * @filter           Brightness / Contrast
-         * @description      Provides additive brightness and multiplicative contrast control.
+         * @filter           Brightness
+         * @description      Provides additive brightness control.
          * @param brightness -1 to 1 (-1 is solid black, 0 is no change, and 1 is solid white)
-         * @param contrast   -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
          */
-        var BrightnessContrast = (function (_super) {
-            __extends(BrightnessContrast, _super);
-            function BrightnessContrast(brightness, contrast) {
-                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float brightness;\n            uniform float contrast;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                color.rgb += brightness;\n\n                if (contrast > 0.0) {\n                    color.rgb = (color.rgb - 0.5) / (1.0 - contrast) + 0.5;\n                } else {\n                    color.rgb = (color.rgb - 0.5) * (1.0 + contrast) + 0.5;\n                }\n\n                gl_FragColor = color;\n            }\n        ");
+        var Brightness = (function (_super) {
+            __extends(Brightness, _super);
+            function Brightness(brightness) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float brightness;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                color.rgb += brightness;\n\n                gl_FragColor = color;\n            }\n        ");
                 // set properties
                 this.properties.brightness = jsfx.Filter.clamp(-1, brightness, 1) || 0;
+            }
+            Brightness.prototype.iterateCanvas = function (helper) {
+                var brightness = this.properties.brightness;
+                helper.r += brightness;
+                helper.g += brightness;
+                helper.b += brightness;
+            };
+            return Brightness;
+        })(jsfx.IterableFilter);
+        filter.Brightness = Brightness;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter           Contrast
+         * @description      Provides multiplicative contrast control.
+         * @param contrast   -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+         */
+        var Contrast = (function (_super) {
+            __extends(Contrast, _super);
+            function Contrast(contrast) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float contrast;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                if (contrast > 0.0) {\n                    color.rgb = (color.rgb - 0.5) / (1.0 - contrast) + 0.5;\n                } else {\n                    color.rgb = (color.rgb - 0.5) * (1.0 + contrast) + 0.5;\n                }\n\n                gl_FragColor = color;\n            }\n        ");
+                // set properties
                 this.properties.contrast = jsfx.Filter.clamp(-1, contrast, 1) || 0;
             }
-            BrightnessContrast.prototype.drawCanvas = function (imageData) {
-                var pixels = imageData.data;
-                var brightness = this.properties.brightness;
+            Contrast.prototype.iterateCanvas = function (helper) {
                 var contrast = this.properties.contrast;
-                var r, g, b;
-                for (var i = 0; i < pixels.length; i += 4) {
-                    // get color values
-                    r = pixels[i] / 255;
-                    g = pixels[i + 1] / 255;
-                    b = pixels[i + 2] / 255;
-                    // apply brightness
-                    r += brightness;
-                    g += brightness;
-                    b += brightness;
-                    // apply contrast
-                    if (contrast > 0) {
-                        r = (r - 0.5) / (1 - contrast) + 0.5;
-                        g = (g - 0.5) / (1 - contrast) + 0.5;
-                        b = (b - 0.5) / (1 - contrast) + 0.5;
-                    }
-                    else {
-                        r = (r - 0.5) * (1 + contrast) + 0.5;
-                        g = (g - 0.5) * (1 + contrast) + 0.5;
-                        b = (b - 0.5) * (1 + contrast) + 0.5;
-                    }
-                    // set color values
-                    pixels[i] = r * 255;
-                    pixels[i + 1] = g * 255;
-                    pixels[i + 2] = b * 255;
+                if (contrast > 0) {
+                    helper.r = (helper.r - 0.5) / (1 - contrast) + 0.5;
+                    helper.g = (helper.g - 0.5) / (1 - contrast) + 0.5;
+                    helper.b = (helper.b - 0.5) / (1 - contrast) + 0.5;
                 }
-                return imageData;
+                else {
+                    helper.r = (helper.r - 0.5) * (1 + contrast) + 0.5;
+                    helper.g = (helper.g - 0.5) * (1 + contrast) + 0.5;
+                    helper.b = (helper.b - 0.5) * (1 + contrast) + 0.5;
+                }
             };
-            return BrightnessContrast;
-        })(jsfx.Filter);
-        filter.BrightnessContrast = BrightnessContrast;
+            return Contrast;
+        })(jsfx.IterableFilter);
+        filter.Contrast = Contrast;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
@@ -547,73 +609,75 @@ var jsfx;
     (function (filter) {
         /**
          * @filter           Hue / Saturation
-         * @description      Provides rotational hue and multiplicative saturation control. RGB color space
+         * @description      Provides rotational hue control. RGB color space
          *                   can be imagined as a cube where the axes are the red, green, and blue color
          *                   values. Hue changing works by rotating the color vector around the grayscale
          *                   line, which is the straight line from black (0, 0, 0) to white (1, 1, 1).
-         *                   Saturation is implemented by scaling all color channel values either toward
-         *                   or away from the average color channel value.
          * @param hue        -1 to 1 (-1 is 180 degree rotation in the negative direction, 0 is no change,
          *                   and 1 is 180 degree rotation in the positive direction)
-         * @param saturation -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
          */
-        var HueSaturation = (function (_super) {
-            __extends(HueSaturation, _super);
-            function HueSaturation(hue, saturation) {
-                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float hue;\n            uniform float saturation;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                /* hue adjustment, wolfram alpha: RotationTransform[angle, {1, 1, 1}][{x, y, z}] */\n                float angle = hue * 3.14159265;\n                float s = sin(angle), c = cos(angle);\n                vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;\n                color.rgb = vec3(\n                    dot(color.rgb, weights.xyz),\n                    dot(color.rgb, weights.zxy),\n                    dot(color.rgb, weights.yzx)\n                );\n\n                /* saturation adjustment */\n                float average = (color.r + color.g + color.b) / 3.0;\n                if (saturation > 0.0) {\n                    color.rgb += (average - color.rgb) * (1.0 - 1.0 / (1.001 - saturation));\n                } else {\n                    color.rgb += (average - color.rgb) * (-saturation);\n                }\n\n                gl_FragColor = color;\n            }\n        ");
+        var Hue = (function (_super) {
+            __extends(Hue, _super);
+            function Hue(hue) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float hue;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                /* hue adjustment, wolfram alpha: RotationTransform[angle, {1, 1, 1}][{x, y, z}] */\n                float angle = hue * 3.14159265;\n                float s = sin(angle), c = cos(angle);\n                vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;\n                color.rgb = vec3(\n                    dot(color.rgb, weights.xyz),\n                    dot(color.rgb, weights.zxy),\n                    dot(color.rgb, weights.yzx)\n                );\n\n                gl_FragColor = color;\n            }\n        ");
                 // set properties
                 this.properties.hue = jsfx.Filter.clamp(-1, hue, 1) || 0;
-                this.properties.saturation = jsfx.Filter.clamp(-1, saturation, 1) || 0;
-            }
-            HueSaturation.prototype.drawCanvas = function (imageData) {
-                var pixels = imageData.data;
-                var hue = this.properties.hue;
-                var saturation = this.properties.saturation;
+                // pre-calculate data for canvas iteration
                 var angle = hue * 3.14159265;
                 var sin = Math.sin(angle);
                 var cos = Math.cos(angle);
-                var average, r, g, b, rgb, weights;
-                for (var i = 0; i < pixels.length; i += 4) {
-                    if (hue) {
-                        rgb = new jsfx.util.Vector3(pixels[i] / 255, pixels[i + 1] / 255, pixels[i + 2] / 255);
-                        // apply hue
-                        weights = new jsfx.util.Vector3(2 * cos, -Math.sqrt(3.0) * sin - cos, Math.sqrt(3.0) * sin - cos);
-                        // add 1 and average the vector
-                        weights
-                            .addScalar(1.0)
-                            .divideScalar(3.0);
-                        // set rgb
-                        r = rgb.dot(weights);
-                        g = rgb.dotScalars(weights.z, weights.x, weights.y);
-                        b = rgb.dotScalars(weights.y, weights.z, weights.x);
-                    }
-                    else {
-                        r = pixels[i] / 255;
-                        g = pixels[i + 1] / 255;
-                        b = pixels[i + 2] / 255;
-                    }
-                    // apply saturation
-                    average = (r + g + b) / 3;
-                    if (saturation > 0) {
-                        r += (average - r) * (1 - 1 / (1.001 - saturation));
-                        g += (average - g) * (1 - 1 / (1.001 - saturation));
-                        b += (average - b) * (1 - 1 / (1.001 - saturation));
-                    }
-                    else {
-                        r += (average - r) * (-saturation);
-                        g += (average - g) * (-saturation);
-                        b += (average - b) * (-saturation);
-                    }
-                    // set values
-                    pixels[i] = r * 255;
-                    pixels[i + 1] = g * 255;
-                    pixels[i + 2] = b * 255;
-                }
-                return imageData;
+                this.weights = new jsfx.util.Vector3(2 * cos, -Math.sqrt(3.0) * sin - cos, Math.sqrt(3.0) * sin - cos)
+                    .addScalar(1.0)
+                    .divideScalar(3.0);
+            }
+            Hue.prototype.iterateCanvas = function (helper) {
+                var rgb = helper.toVector3();
+                helper.r = rgb.dot(this.weights);
+                helper.g = rgb.dotScalars(this.weights.z, this.weights.x, this.weights.y);
+                helper.b = rgb.dotScalars(this.weights.y, this.weights.z, this.weights.x);
             };
-            return HueSaturation;
-        })(jsfx.Filter);
-        filter.HueSaturation = HueSaturation;
+            return Hue;
+        })(jsfx.IterableFilter);
+        filter.Hue = Hue;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter           Hue / Saturation
+         * @description      Provides multiplicative saturation control. RGB color space
+         *                   can be imagined as a cube where the axes are the red, green, and blue color
+         *                   values.
+         *                   Saturation is implemented by scaling all color channel values either toward
+         *                   or away from the average color channel value.
+         * @param saturation -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+         */
+        var Saturation = (function (_super) {
+            __extends(Saturation, _super);
+            function Saturation(saturation) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float saturation;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float average = (color.r + color.g + color.b) / 3.0;\n                if (saturation > 0.0) {\n                    color.rgb += (average - color.rgb) * (1.0 - 1.0 / (1.001 - saturation));\n                } else {\n                    color.rgb += (average - color.rgb) * (-saturation);\n                }\n\n                gl_FragColor = color;\n            }\n        ");
+                // set properties
+                this.properties.saturation = jsfx.Filter.clamp(-1, saturation, 1) || 0;
+            }
+            Saturation.prototype.iterateCanvas = function (helper) {
+                var saturation = this.properties.saturation;
+                var average = (helper.r + helper.g + helper.b) / 3;
+                if (saturation > 0) {
+                    helper.r += (average - helper.r) * (1 - 1 / (1.001 - saturation));
+                    helper.g += (average - helper.g) * (1 - 1 / (1.001 - saturation));
+                    helper.b += (average - helper.b) * (1 - 1 / (1.001 - saturation));
+                }
+                else {
+                    helper.r += (average - helper.r) * (-saturation);
+                    helper.g += (average - helper.g) * (-saturation);
+                    helper.b += (average - helper.b) * (-saturation);
+                }
+            };
+            return Saturation;
+        })(jsfx.IterableFilter);
+        filter.Saturation = Saturation;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
@@ -632,22 +696,17 @@ var jsfx;
                 // set properties
                 this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
             }
-            Sepia.prototype.drawCanvas = function (imageData) {
-                var pixels = imageData.data;
+            Sepia.prototype.iterateCanvas = function (helper) {
+                var r = helper.r;
+                var g = helper.g;
+                var b = helper.b;
                 var amount = this.properties.amount;
-                var r, g, b;
-                for (var i = 0; i < pixels.length; i += 4) {
-                    r = pixels[i] / 255;
-                    g = pixels[i + 1] / 255;
-                    b = pixels[i + 2] / 255;
-                    pixels[i] = Math.min(1.0, (r * (1.0 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount))) * 255;
-                    pixels[i + 1] = Math.min(1.0, (r * 0.349 * amount) + (g * (1.0 - (0.314 * amount))) + (b * 0.168 * amount)) * 255;
-                    pixels[i + 2] = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount)))) * 255;
-                }
-                return imageData;
+                helper.r = Math.min(1.0, (r * (1.0 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount)));
+                helper.g = Math.min(1.0, (r * 0.349 * amount) + (g * (1.0 - (0.314 * amount))) + (b * 0.168 * amount));
+                helper.b = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount))));
             };
             return Sepia;
-        })(jsfx.Filter);
+        })(jsfx.IterableFilter);
         filter.Sepia = Sepia;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -661,6 +720,7 @@ var jsfx;
          *                 is implemented by scaling pixels away from the average of their neighbors.
          * @param radius   0 to 180 - The blur radius that calculates the average of the neighboring pixels.
          * @param strength A scale factor where 0 is no effect and higher values cause a stronger effect.
+         * @note           Could potentially be converted to an IterableFilter, but we somehow need the original ImageData
          */
         var UnsharpMask = (function (_super) {
             __extends(UnsharpMask, _super);
@@ -719,6 +779,41 @@ var jsfx;
         })(jsfx.Filter);
         filter.UnsharpMask = UnsharpMask;
     })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var util;
+    (function (util) {
+        var ImageDataHelper = (function () {
+            function ImageDataHelper(imageData, index) {
+                this.imageData = imageData;
+                this.index = index;
+                this.r = this.imageData.data[index] / 255;
+                this.g = this.imageData.data[index + 1] / 255;
+                this.b = this.imageData.data[index + 2] / 255;
+                this.a = this.imageData.data[index + 3] / 255;
+            }
+            ImageDataHelper.prototype.getImageData = function () {
+                return this.imageData;
+            };
+            ImageDataHelper.prototype.save = function () {
+                this.imageData.data[this.index] = this.r * 255;
+                this.imageData.data[this.index + 1] = this.g * 255;
+                this.imageData.data[this.index + 2] = this.b * 255;
+                this.imageData.data[this.index + 3] = this.a * 255;
+            };
+            ImageDataHelper.prototype.toVector3 = function () {
+                return new jsfx.util.Vector3(this.r, this.g, this.b);
+            };
+            ImageDataHelper.prototype.fromVector3 = function (v) {
+                this.r = v.x;
+                this.g = v.y;
+                this.b = v.z;
+            };
+            return ImageDataHelper;
+        })();
+        util.ImageDataHelper = ImageDataHelper;
+    })(util = jsfx.util || (jsfx.util = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
 (function (jsfx) {
@@ -884,6 +979,13 @@ var jsfx;
             };
             Renderer.prototype.applyFilter = function (filter) {
                 filter.drawWebGL(this);
+                return this;
+            };
+            Renderer.prototype.applyFilters = function (filters) {
+                var _this = this;
+                filters.forEach(function (filter) {
+                    filter.drawWebGL(_this);
+                });
                 return this;
             };
             Renderer.prototype.render = function () {

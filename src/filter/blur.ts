@@ -131,7 +131,6 @@ namespace jsfx.filter {
           stack = stack.next;
         }
 
-
         stackIn = stackStart;
         stackOut = stackEnd;
         for (x = 0; x < width; x++) {

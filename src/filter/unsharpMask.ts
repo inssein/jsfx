@@ -7,6 +7,7 @@ namespace jsfx.filter {
    *                 is implemented by scaling pixels away from the average of their neighbors.
    * @param radius   0 to 180 - The blur radius that calculates the average of the neighboring pixels.
    * @param strength A scale factor where 0 is no effect and higher values cause a stronger effect.
+   * @note           Could potentially be converted to an IterableFilter, but we somehow need the original ImageData
    */
   export class UnsharpMask extends jsfx.Filter {
     constructor(radius? : number, strength ? : number) {
@@ -29,7 +30,7 @@ namespace jsfx.filter {
       this.properties.strength = strength;
     }
 
-    drawWebGL(renderer : jsfx.webgl.Renderer) {
+    drawWebGL(renderer : jsfx.webgl.Renderer) : void {
       var shader = renderer.getShader(this);
       var radius = this.properties.radius;
       var strength = this.properties.strength;

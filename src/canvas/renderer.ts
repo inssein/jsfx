@@ -9,7 +9,7 @@ namespace jsfx.canvas {
     private imageData : ImageData;
 
     constructor() {
-      this.canvas = this.createCanvas();
+      this.canvas = jsfx.canvas.Renderer.createCanvas();
       this.ctx = this.canvas.getContext("2d");
       this.source = null;
       this.imageData = null;
@@ -45,6 +45,41 @@ namespace jsfx.canvas {
       return this;
     }
 
+    public applyFilters(filters : jsfx.FilterInterface[]) : jsfx.RendererInterface {
+      var stack : jsfx.IterableFilterInterface[] = [];
+      var filter : jsfx.FilterInterface;
+
+      for (var i : number = 0; i < filters.length; i++) {
+        filter = filters[i];
+
+        if (filter instanceof jsfx.IterableFilter) {
+          stack.push(<jsfx.IterableFilterInterface> filter);
+        } else {
+          // if there if something in the stack, apply that first
+          if (stack.length > 0) {
+            this.applyFilterStack(stack);
+            stack = [];
+          }
+
+          // apply current filter
+          this.applyFilter(filter);
+        }
+      }
+
+      // if there is still a stack left, apply it
+      if (stack.length > 0) {
+        this.applyFilterStack(stack);
+      }
+
+      return this;
+    }
+
+    private applyFilterStack(stack : jsfx.IterableFilterInterface[]) {
+      this.imageData = jsfx.IterableFilter.drawCanvas(stack, this.imageData);
+
+      return this;
+    }
+
     public render() : void {
       this.ctx.putImageData(this.imageData, 0, 0);
     }
@@ -58,7 +93,7 @@ namespace jsfx.canvas {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    private createCanvas() : HTMLCanvasElement {
+    static createCanvas() : HTMLCanvasElement {
       return typeof Buffer !== "undefined" && typeof window === "undefined" ?
         new (require("canvas"))(100, 100) :
         document.createElement("canvas");

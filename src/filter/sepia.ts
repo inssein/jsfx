@@ -4,7 +4,7 @@ namespace jsfx.filter {
    * @description    Gives the image a reddish-brown monochrome tint that imitates an old photograph.
    * @param amount   0 to 1 (0 for no effect, 1 for full sepia coloring)
    */
-  export class Sepia extends jsfx.Filter {
+  export class Sepia extends jsfx.IterableFilter {
     constructor(amount? : number) {
       super(null, `
             uniform sampler2D texture;
@@ -29,22 +29,15 @@ namespace jsfx.filter {
       this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
     }
 
-    public drawCanvas(imageData : ImageData) : ImageData {
-      var pixels = imageData.data;
-      var amount = this.properties.amount;
-      var r, g, b;
+    public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
+      var r : number = helper.r;
+      var g : number = helper.g;
+      var b : number = helper.b;
+      var amount : number = this.properties.amount;
 
-      for (var i = 0; i < pixels.length; i += 4) {
-        r = pixels[i] / 255;
-        g = pixels[i + 1] / 255;
-        b = pixels[i + 2] / 255;
-
-        pixels[i] = Math.min(1.0, (r * (1.0 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount))) * 255;
-        pixels[i + 1] = Math.min(1.0, (r * 0.349 * amount) + (g * (1.0 - (0.314 * amount))) + (b * 0.168 * amount)) * 255;
-        pixels[i + 2] = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount)))) * 255;
-      }
-
-      return imageData;
+      helper.r = Math.min(1.0, (r * (1.0 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount)));
+      helper.g = Math.min(1.0, (r * 0.349 * amount) + (g * (1.0 - (0.314 * amount))) + (b * 0.168 * amount));
+      helper.b = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount))));
     }
   }
 }
