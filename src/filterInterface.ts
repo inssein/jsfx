@@ -4,6 +4,6 @@ namespace jsfx {
     getVertexSource() : string;
     getFragmentSource() : string;
     drawCanvas(imageData : ImageData) : ImageData;
-    drawWebGL(renderer) : void;
+    drawWebGL(renderer:jsfx.webgl.Renderer) : void;
   }
 }
