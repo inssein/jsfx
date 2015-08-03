@@ -163,7 +163,7 @@ var jsfx;
         /**
          * @filter         Blur
          * @description    This is the TriangleBlur from glfx, but for the canvas implementation, we are cheating by
-         *                 using StackBlur.
+         *                 using StackBlur. The implementations are obviously very different, but the results are very close.
          * @param radius   The radius of the pyramid convolved with the image.
          */
         var Blur = (function (_super) {
@@ -659,7 +659,7 @@ var jsfx;
          * @filter         Unsharp Mask
          * @description    A form of image sharpening that amplifies high-frequencies in the image. It
          *                 is implemented by scaling pixels away from the average of their neighbors.
-         * @param radius   The blur radius that calculates the average of the neighboring pixels.
+         * @param radius   0 to 180 - The blur radius that calculates the average of the neighboring pixels.
          * @param strength A scale factor where 0 is no effect and higher values cause a stronger effect.
          */
         var UnsharpMask = (function (_super) {
@@ -700,9 +700,9 @@ var jsfx;
                 var radius = this.properties.radius;
                 var strength = this.properties.strength + 1;
                 // clone of data
-                //var original : number[] = imageData.data;
+                // @todo: declared my own Uint8ClampedArray above since I am having issues with TypeScript.
+                // additionally, my previous called imageData.data.set(original) (which I also can't here because of TS mapping)
                 var original = new Uint8ClampedArray(imageData.data);
-                //imageData.data.set(original);
                 imageData.data = original;
                 // blur image
                 var blur = new filter.Blur(radius);
