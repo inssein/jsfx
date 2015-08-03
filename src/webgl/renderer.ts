@@ -84,7 +84,7 @@ namespace jsfx.webgl {
     }
 
     public getDefaultShader() : jsfx.webgl.Shader {
-      if ((<any>this.gl).shaderCache.def) {
+      if (!(<any>this.gl).shaderCache.def) {
         (<any>this.gl).shaderCache.def = new jsfx.webgl.Shader(this.gl);
       }
 
@@ -92,7 +92,7 @@ namespace jsfx.webgl {
     }
 
     public getFlippedShader() : jsfx.webgl.Shader {
-      if ((<any>this.gl).shaderCache.flipped) {
+      if (!(<any>this.gl).shaderCache.flipped) {
         (<any>this.gl).shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, `
                 uniform sampler2D texture;
                 varying vec2 texCoord;
