@@ -5,23 +5,39 @@
 
   demo.filters = [
     new demo.Filter(
-      'Brightness / Contrast',
+      'Brightness',
       function() {
         this.addSlider('brightness', 'Brightness', -1, 1, 0, 0.01);
-        this.addSlider('contrast', 'Contrast', -1, 1, 0, 0.01);
       },
       function(renderer) {
-        renderer.applyFilter(new jsfx.filter.BrightnessContrast(this.brightness, this.contrast));
+        renderer.applyFilter(new jsfx.filter.Brightness(this.brightness));
       }
     ),
     new demo.Filter(
-      'Hue / Saturation',
+      'Contrast',
+      function() {
+        this.addSlider('contrast', 'Contrast', -1, 1, 0, 0.01);
+      },
+      function(renderer) {
+        renderer.applyFilter(new jsfx.filter.Contrast(this.contrast));
+      }
+    ),
+    new demo.Filter(
+      'Hue',
       function() {
         this.addSlider('hue', 'Hue', -1, 1, 0, 0.01);
+      },
+      function(renderer) {
+        renderer.applyFilter(new jsfx.filter.Hue(this.hue));
+      }
+    ),
+    new demo.Filter(
+      'Saturation',
+      function() {
         this.addSlider('saturation', 'Saturation', -1, 1, 0, 0.01);
       },
       function(renderer) {
-        renderer.applyFilter(new jsfx.filter.HueSaturation(this.hue, this.saturation));
+        renderer.applyFilter(new jsfx.filter.Saturation(this.saturation));
       }
     ),
     new demo.Filter('Sepia', function() {
