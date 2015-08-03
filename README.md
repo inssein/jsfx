@@ -14,6 +14,7 @@ Demo: https://jsfx.inssein.com
 * A lot of the filter files have the comments and the webgl shaders copied from glfx.js. I should probably attribute the single files as well as mentioning it in the credits.
 * Add tests
 * Test server side rendering with node-canvas, and add documentation
+* Add minified build
 
 
 # credits
