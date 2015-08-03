@@ -3,8 +3,6 @@ namespace jsfx.webgl {
     private id : WebGLTexture;
     private element : HTMLImageElement;
 
-    private static frameBuffer : WebGLFramebuffer;
-
     constructor(private gl : WebGLRenderingContext, private width : number, private height : number, private format : number = gl.RGBA, private type : number = gl.UNSIGNED_BYTE) {
       this.id = gl.createTexture();
       this.element = null;
@@ -51,8 +49,8 @@ namespace jsfx.webgl {
 
     public drawTo(callback : Function) : void {
       // create and bind frame buffer
-      Texture.frameBuffer = Texture.frameBuffer || this.gl.createFramebuffer();
-      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, Texture.frameBuffer);
+      (<any>this.gl).frameBuffer = (<any>this.gl).frameBuffer || this.gl.createFramebuffer();
+      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, (<any>this.gl).frameBuffer);
       this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.id, 0);
 
       // ensure there was no error

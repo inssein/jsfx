@@ -1039,14 +1039,14 @@ var jsfx;
                 left = left !== undefined ? (left - viewport[0]) / viewport[2] : 0;
                 right = right !== undefined ? (right - viewport[0]) / viewport[2] : 1;
                 bottom = bottom !== undefined ? (bottom - viewport[1]) / viewport[3] : 1;
-                if (Shader.vertexBuffer == null) {
-                    Shader.vertexBuffer = this.gl.createBuffer();
+                if (!this.gl.vertexBuffer) {
+                    this.gl.vertexBuffer = this.gl.createBuffer();
                 }
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, Shader.vertexBuffer);
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.vertexBuffer);
                 this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([left, top, left, bottom, right, top, right, bottom]), this.gl.STATIC_DRAW);
-                if (Shader.texCoordBuffer == null) {
-                    Shader.texCoordBuffer = this.gl.createBuffer();
-                    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, Shader.texCoordBuffer);
+                if (!this.gl.texCoordBuffer) {
+                    this.gl.texCoordBuffer = this.gl.createBuffer();
+                    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.texCoordBuffer);
                     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]), this.gl.STATIC_DRAW);
                 }
                 if (this.vertexAttribute == null) {
@@ -1058,9 +1058,9 @@ var jsfx;
                     this.gl.enableVertexAttribArray(this.texCoordAttribute);
                 }
                 this.gl.useProgram(this.program);
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, Shader.vertexBuffer);
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.vertexBuffer);
                 this.gl.vertexAttribPointer(this.vertexAttribute, 2, this.gl.FLOAT, false, 0, 0);
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, Shader.texCoordBuffer);
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.texCoordBuffer);
                 this.gl.vertexAttribPointer(this.texCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
                 this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
             };
@@ -1139,8 +1139,8 @@ var jsfx;
             };
             Texture.prototype.drawTo = function (callback) {
                 // create and bind frame buffer
-                Texture.frameBuffer = Texture.frameBuffer || this.gl.createFramebuffer();
-                this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, Texture.frameBuffer);
+                this.gl.frameBuffer = this.gl.frameBuffer || this.gl.createFramebuffer();
+                this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.gl.frameBuffer);
                 this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.id, 0);
                 // ensure there was no error
                 if (this.gl.checkFramebufferStatus(this.gl.FRAMEBUFFER) !== this.gl.FRAMEBUFFER_COMPLETE) {
