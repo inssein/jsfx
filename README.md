@@ -1,8 +1,12 @@
 # jsfx
 
-An image effects library, heavily inspired by https://github.com/evanw/glfx.js. I needed something that could fallback to a canvas, and additionally, I needed the same effects to render server side.
+An image effects library, heavily inspired by https://github.com/evanw/glfx.js. I needed something that could fallback 
+to a canvas, and additionally, I needed the same effects to render server side.
 
-Demo: https://jsfx.inssein.com
+This library is currently in heavy development, and not tested. You should probably refrain from using it in production
+until it becomes stable.
+
+Demo: http://jsfx.inssein.com
 
 # todo
 
