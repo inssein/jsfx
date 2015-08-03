@@ -35,6 +35,10 @@ namespace jsfx.canvas {
       return this;
     }
 
+    public getSource() : jsfx.Source {
+      return this.source;
+    }
+
     public applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
       this.imageData = filter.drawCanvas(this.imageData);
 

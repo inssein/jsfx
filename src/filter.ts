@@ -29,7 +29,7 @@ namespace jsfx {
      *
      * @param renderer
      */
-    public drawWebGL(renderer) : void {
+    public drawWebGL(renderer : jsfx.webgl.Renderer) : void {
       var shader = renderer.getShader(this);
       var properties = this.getProperties();
 

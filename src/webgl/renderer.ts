@@ -43,6 +43,10 @@ namespace jsfx.webgl {
       return this;
     }
 
+    public getSource() : jsfx.Source {
+      return this.source;
+    }
+
     applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
       filter.drawWebGL(this);
 
