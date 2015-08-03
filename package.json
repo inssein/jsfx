@@ -1,12 +1,20 @@
 {
   "name": "jsfx",
+  "version": "0.0.1",
+  "description": "An image effects library powered by WebGL, with a Javascript fallback.",
+  "homepage": "http://jsfx.inssein.com",
+  "author": "Hussein Jafferjee <hussein@jafferjee.ca>",
+  "keywords": [
+    "webgl",
+    "canvas",
+    "image",
+    "effects"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/inssein/jsfx.git"
   },
-  "version": "0.0.1",
-  "author": "",
-  "main": "build/jsfx.js",
+  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.6.2",
@@ -18,5 +26,6 @@
   "scripts": {
     "main": "gulp buildrun",
     "test": "gulp build && mocha"
-  }
+  },
+  "main": "build/jsfx.js"
 }
