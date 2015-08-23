@@ -774,7 +774,7 @@ var jsfx;
                 // get processed image data
                 var imageData = renderer.getImageData();
                 var pixels = imageData.data;
-                // trying to replicate mix() from webgl, which is basically x * (1 -a)
+                // trying to replicate mix(x, y, a) from webgl, which is basically x * (1 -a) + y * a
                 for (var i = 0; i < pixels.length; i += 4) {
                     pixels[i] = pixels[i] * (1 - strength) + original[i] * strength;
                     pixels[i + 1] = pixels[i + 1] * (1 - strength) + original[i + 1] * strength;
@@ -785,6 +785,33 @@ var jsfx;
             return UnsharpMask;
         })(jsfx.Filter);
         filter.UnsharpMask = UnsharpMask;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter       Vibrance
+         * @description  Modifies the saturation of desaturated colors, leaving saturated colors unmodified.
+         * @param amount -1 to 1 (-1 is minimum vibrance, 0 is no change, and 1 is maximum vibrance)
+         */
+        var Vibrance = (function (_super) {
+            __extends(Vibrance, _super);
+            function Vibrance(amount) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float average = (color.r + color.g + color.b) / 3.0;\n                float mx = max(color.r, max(color.g, color.b));\n                float amt = (mx - average) * (-amount * 3.0);\n                color.rgb = mix(color.rgb, vec3(mx), amt);\n                gl_FragColor = color;\n            }\n        ");
+                // set properties
+                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+            }
+            Vibrance.prototype.iterateCanvas = function (helper) {
+                var amount = this.properties.amount;
+                var average = (helper.r + helper.g + helper.b) / 3.0;
+                var mx = Math.max(helper.r, Math.max(helper.g, helper.b));
+                helper.mix(mx, mx, mx, (mx - average) * (-amount * 3.0));
+            };
+            return Vibrance;
+        })(jsfx.IterableFilter);
+        filter.Vibrance = Vibrance;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
@@ -816,6 +843,19 @@ var jsfx;
                 this.r = v.x;
                 this.g = v.y;
                 this.b = v.z;
+            };
+            /**
+             * mix(x, y, a) = x * (1 - a) + y * a
+             *
+             * @param r
+             * @param g
+             * @param b
+             * @param a
+             */
+            ImageDataHelper.prototype.mix = function (r, g, b, a) {
+                this.r = this.r * (1 - a) + r * a;
+                this.g = this.g * (1 - a) + g * a;
+                this.b = this.b * (1 - a) + b * a;
             };
             return ImageDataHelper;
         })();

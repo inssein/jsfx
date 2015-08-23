@@ -32,5 +32,19 @@ namespace jsfx.util {
       this.g = v.y;
       this.b = v.z;
     }
+
+    /**
+     * mix(x, y, a) = x * (1 - a) + y * a
+     *
+     * @param r
+     * @param g
+     * @param b
+     * @param a
+     */
+    public mix(r : number, g : number, b : number, a : number) : void {
+      this.r = this.r * (1 - a) + r * a;
+      this.g = this.g * (1 - a) + g * a;
+      this.b = this.b * (1 - a) + b * a;
+    }
   }
 }
