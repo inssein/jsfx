@@ -42,9 +42,13 @@ namespace jsfx.util {
      * @param a
      */
     public mix(r : number, g : number, b : number, a : number) : void {
-      this.r = this.r * (1 - a) + r * a;
-      this.g = this.g * (1 - a) + g * a;
-      this.b = this.b * (1 - a) + b * a;
+      this.r = ImageDataHelper.mix(this.r, r, a);
+      this.g = ImageDataHelper.mix(this.g, g, a);
+      this.b = ImageDataHelper.mix(this.b, b, a);
+    }
+
+    public static mix(x : number, y : number, a : number) : number {
+      return x * (1 - a) + y * a;
     }
   }
 }

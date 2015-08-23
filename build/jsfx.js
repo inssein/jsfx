@@ -774,11 +774,10 @@ var jsfx;
                 // get processed image data
                 var imageData = renderer.getImageData();
                 var pixels = imageData.data;
-                // trying to replicate mix(x, y, a) from webgl, which is basically x * (1 -a) + y * a
                 for (var i = 0; i < pixels.length; i += 4) {
-                    pixels[i] = pixels[i] * (1 - strength) + original[i] * strength;
-                    pixels[i + 1] = pixels[i + 1] * (1 - strength) + original[i + 1] * strength;
-                    pixels[i + 2] = pixels[i + 2] * (1 - strength) + original[i + 2] * strength;
+                    pixels[i] = jsfx.util.ImageDataHelper.mix(pixels[i], original[i], strength);
+                    pixels[i + 1] = jsfx.util.ImageDataHelper.mix(pixels[i + 1], original[i + 1], strength);
+                    pixels[i + 2] = jsfx.util.ImageDataHelper.mix(pixels[i + 2], original[i + 2], strength);
                 }
                 renderer.setImageData(imageData);
             };
@@ -853,9 +852,12 @@ var jsfx;
              * @param a
              */
             ImageDataHelper.prototype.mix = function (r, g, b, a) {
-                this.r = this.r * (1 - a) + r * a;
-                this.g = this.g * (1 - a) + g * a;
-                this.b = this.b * (1 - a) + b * a;
+                this.r = ImageDataHelper.mix(this.r, r, a);
+                this.g = ImageDataHelper.mix(this.g, g, a);
+                this.b = ImageDataHelper.mix(this.b, b, a);
+            };
+            ImageDataHelper.mix = function (x, y, a) {
+                return x * (1 - a) + y * a;
             };
             return ImageDataHelper;
         })();

@@ -77,11 +77,10 @@ namespace jsfx.filter {
       var imageData : ImageData = renderer.getImageData();
       var pixels : number[] = imageData.data;
 
-      // trying to replicate mix(x, y, a) from webgl, which is basically x * (1 -a) + y * a
       for (var i = 0; i < pixels.length; i += 4) {
-        pixels[i] = pixels[i] * (1 - strength) + original[i] * strength;
-        pixels[i + 1] = pixels[i + 1] * (1 - strength) + original[i + 1] * strength;
-        pixels[i + 2] = pixels[i + 2] * (1 - strength) + original[i + 2] * strength;
+        pixels[i] = jsfx.util.ImageDataHelper.mix(pixels[i], original[i], strength);
+        pixels[i + 1] = jsfx.util.ImageDataHelper.mix(pixels[i + 1], original[i + 1], strength);
+        pixels[i + 2] = jsfx.util.ImageDataHelper.mix(pixels[i + 2], original[i + 2], strength);
       }
 
       renderer.setImageData(imageData);
