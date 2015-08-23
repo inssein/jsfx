@@ -16,6 +16,10 @@ namespace jsfx.util {
       return this.imageData;
     }
 
+    public getIndex() : number {
+      return this.index;
+    }
+
     public save() : void {
       this.imageData.data[this.index] = this.r * 255;
       this.imageData.data[this.index + 1] = this.g * 255;
