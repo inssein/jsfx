@@ -1277,7 +1277,6 @@ var jsfx;
         webgl.Texture = Texture;
     })(webgl = jsfx.webgl || (jsfx.webgl = {}));
 })(jsfx || (jsfx = {}));
-var module = module;
 if (typeof module !== 'undefined') {
     module.exports = jsfx;
 }
