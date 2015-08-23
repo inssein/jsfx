@@ -1,3 +1,7 @@
+[![NPM version][npm-badge]][npm-url]
+[![Download Status][download-badge]][npm-url]
+[![Dependency Status][dep-badge]][dep-url]
+
 # jsfx
 
 An image effects library, heavily inspired by https://github.com/evanw/glfx.js. I needed something that could fallback 
@@ -32,4 +36,11 @@ Demo: http://jsfx.inssein.com
 
 # license
 
-MIT
+MIT © [Hussein Jafferjee][author]
+
+[author]: https://github.com/inssein
+[npm-url]: https://npmjs.org/package/jsfx
+[npm-badge]: https://img.shields.io/npm/v/jsfx.svg?style=flat-square
+[dep-url]: https://david-dm.org/inssein/generator-rise
+[dep-badge]: https://david-dm.org/inssein/jsfx.svg?style=flat-square
+[download-badge]: http://img.shields.io/npm/dm/jsfx.svg?style=flat-square
