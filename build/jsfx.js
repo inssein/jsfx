@@ -763,20 +763,8 @@ var jsfx;
                 });
                 extraTexture.unuse(1);
             };
-            /**
-             *
-             * @param renderer
-             */
             UnsharpMask.prototype.drawCanvas = function (renderer) {
-                var original;
-                if (typeof window === 'undefined') {
-                    var src = renderer.getSource();
-                    var originalData = renderer.getContext().getImageData(0, 0, src.width, src.height);
-                    original = originalData.data;
-                }
-                else {
-                    original = new Uint8ClampedArray(renderer.getImageData().data);
-                }
+                var original = new Uint8ClampedArray(renderer.getImageData().data);
                 // props
                 var radius = this.properties.radius;
                 var strength = this.properties.strength + 1;

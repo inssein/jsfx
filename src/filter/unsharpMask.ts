@@ -62,21 +62,8 @@ namespace jsfx.filter {
       extraTexture.unuse(1);
     }
 
-    /**
-     *
-     * @param renderer
-     */
     public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
-
-      var original : number[];
-
-      if (typeof window === 'undefined') {
-        var src : jsfx.Source = renderer.getSource();
-        var originalData : ImageData = renderer.getContext().getImageData(0, 0, src.width, src.height);
-        original = originalData.data;
-      } else {
-        original = new Uint8ClampedArray(renderer.getImageData().data);
-      }
+      var original : number[] = new Uint8ClampedArray(renderer.getImageData().data);
 
       // props
       var radius = this.properties.radius;
