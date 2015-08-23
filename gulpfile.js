@@ -6,7 +6,7 @@ var tslint = require('gulp-tslint');
 
 var paths = {
   tscripts: {
-    src:  ['src/**/*.ts'],
+    src:  ['src/**/*.ts', 'exports.ts'],
     dest: 'build'
   }
 };
