@@ -18,9 +18,9 @@ namespace jsfx {
     /**
      * The javascript implementation of the filter
      *
-     * @param imageData
+     * @param renderer
      */
-    public drawCanvas(imageData : ImageData) : ImageData {
+    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
       throw new Error("Must be implemented");
     }
 

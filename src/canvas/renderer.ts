@@ -40,7 +40,7 @@ namespace jsfx.canvas {
     }
 
     public applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
-      this.imageData = filter.drawCanvas(this.imageData);
+      filter.drawCanvas(this);
 
       return this;
     }
@@ -74,18 +74,30 @@ namespace jsfx.canvas {
       return this;
     }
 
-    private applyFilterStack(stack : jsfx.IterableFilterInterface[]) {
-      this.imageData = jsfx.IterableFilter.drawCanvas(stack, this.imageData);
-
-      return this;
-    }
-
     public render() : void {
       this.ctx.putImageData(this.imageData, 0, 0);
     }
 
     public getCanvas() : HTMLCanvasElement {
       return this.canvas;
+    }
+
+    public getContext() : CanvasRenderingContext2D {
+      return this.ctx;
+    }
+
+    public getImageData() : ImageData {
+      return this.imageData;
+    }
+
+    public setImageData(v : ImageData) : void {
+      this.imageData = v;
+    }
+
+    private applyFilterStack(stack : jsfx.IterableFilterInterface[]) {
+      jsfx.IterableFilter.drawCanvas(stack, this);
+
+      return this;
     }
 
     private cleanUp() : void {

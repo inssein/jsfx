@@ -62,22 +62,33 @@ namespace jsfx.filter {
       extraTexture.unuse(1);
     }
 
-    public drawCanvas(imageData : ImageData) : ImageData {
-      var pixels = imageData.data;
+    /**
+     *
+     * @param renderer
+     */
+    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
+
+      var original : number[];
+
+      if (typeof window === 'undefined') {
+        var src : jsfx.Source = renderer.getSource();
+        var originalData : ImageData = renderer.getContext().getImageData(0, 0, src.width, src.height);
+        original = originalData.data;
+      } else {
+        original = new Uint8ClampedArray(renderer.getImageData().data);
+      }
 
       // props
       var radius = this.properties.radius;
       var strength = this.properties.strength + 1;
 
-      // clone of data
-      // @todo: declared my own Uint8ClampedArray above since I am having issues with TypeScript.
-      // additionally, my previous called imageData.data.set(original) (which I also can't here because of TS mapping)
-      var original = new Uint8ClampedArray(imageData.data);
-      imageData.data = original;
-
       // blur image
       var blur = new Blur(radius);
-      blur.drawCanvas(imageData);
+      blur.drawCanvas(renderer);
+
+      // get processed image data
+      var imageData : ImageData = renderer.getImageData();
+      var pixels : number[] = imageData.data;
 
       // trying to replicate mix() from webgl, which is basically x * (1 -a)
       for (var i = 0; i < pixels.length; i += 4) {
@@ -86,7 +97,7 @@ namespace jsfx.filter {
         pixels[i + 2] = pixels[i + 2] * (1 - strength) + original[i + 2] * strength;
       }
 
-      return imageData;
+      renderer.setImageData(imageData);
     }
   }
 }

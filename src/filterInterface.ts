@@ -3,7 +3,7 @@ namespace jsfx {
     getProperties() : Object;
     getVertexSource() : string;
     getFragmentSource() : string;
-    drawCanvas(imageData : ImageData) : ImageData;
+    drawCanvas(renderer : jsfx.canvas.Renderer) : void;
     drawWebGL(renderer : jsfx.webgl.Renderer) : void;
   }
 }

@@ -61,7 +61,8 @@ namespace jsfx.filter {
       });
     }
 
-    public drawCanvas(imageData : ImageData) : ImageData {
+    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
+      var imageData : ImageData = renderer.getImageData();
       var pixels = imageData.data;
       var radius = this.properties.radius;
       var width = imageData.width;
@@ -280,8 +281,6 @@ namespace jsfx.filter {
           yi += width;
         }
       }
-
-      return imageData;
     }
   }
 

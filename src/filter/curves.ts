@@ -49,10 +49,11 @@ namespace jsfx.filter {
       this.blue = blue;
     }
 
-    public drawCanvas(imageData : ImageData) : ImageData {
-      var pixels = imageData.data;
-      var amount = this.properties.amount;
-      var r, g, b;
+    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
+      var imageData : ImageData = renderer.getImageData();
+      var pixels : number[] = imageData.data;
+      var amount : number = this.properties.amount;
+      var r : number, g : number, b : number;
 
       for (var i = 0; i < pixels.length; i += 4) {
         // get color values
@@ -69,8 +70,6 @@ namespace jsfx.filter {
         pixels[i + 1] = g * 255;
         pixels[i + 2] = b * 255;
       }
-
-      return imageData;
     }
 
     static splineInterpolate(points) {
