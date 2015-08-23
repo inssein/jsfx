@@ -3,6 +3,8 @@ var tsc = require('gulp-tsc');
 var shell = require('gulp-shell');
 var runseq = require('run-sequence');
 var tslint = require('gulp-tslint');
+var rename = require('gulp-rename');
+var uglify = require('gulp-uglify');
 
 var paths = {
   tscripts: {
@@ -44,6 +46,9 @@ gulp.task('compile:typescript', function() {
       out:    "jsfx.js",
       target: "ES5"
     }))
+    .pipe(gulp.dest(paths.tscripts.dest))
+    .pipe(uglify())
+    .pipe(rename({ extname: '.min.js' }))
     .pipe(gulp.dest(paths.tscripts.dest));
 });
 
