@@ -20,9 +20,9 @@ var jsfx;
         /**
          * The javascript implementation of the filter
          *
-         * @param imageData
+         * @param renderer
          */
-        Filter.prototype.drawCanvas = function (imageData) {
+        Filter.prototype.drawCanvas = function (renderer) {
             throw new Error("Must be implemented");
         };
         /**
@@ -64,22 +64,22 @@ var jsfx;
         function IterableFilter() {
             _super.apply(this, arguments);
         }
-        IterableFilter.prototype.drawCanvas = function (imageData) {
-            return IterableFilter.drawCanvas([this], imageData);
+        IterableFilter.prototype.drawCanvas = function (renderer) {
+            return IterableFilter.drawCanvas([this], renderer);
         };
         IterableFilter.prototype.iterateCanvas = function (imageData) {
             throw new Error("Must be implemented");
         };
-        IterableFilter.drawCanvas = function (filters, imageData) {
+        IterableFilter.drawCanvas = function (filters, renderer) {
             var helper;
+            var imageData = renderer.getImageData();
             for (var i = 0; i < imageData.data.length; i += 4) {
                 helper = new jsfx.util.ImageDataHelper(imageData, i);
-                for (var j = 0; j < filters.length; j++) {
-                    filters[j].iterateCanvas(helper);
-                }
+                filters.forEach(function (filter) {
+                    filter.iterateCanvas(helper);
+                });
                 helper.save();
             }
-            return imageData;
         };
         return IterableFilter;
     })(jsfx.Filter);
@@ -161,7 +161,7 @@ var jsfx;
                 return this.source;
             };
             Renderer.prototype.applyFilter = function (filter) {
-                this.imageData = filter.drawCanvas(this.imageData);
+                filter.drawCanvas(this);
                 return this;
             };
             Renderer.prototype.applyFilters = function (filters) {
@@ -188,15 +188,24 @@ var jsfx;
                 }
                 return this;
             };
-            Renderer.prototype.applyFilterStack = function (stack) {
-                this.imageData = jsfx.IterableFilter.drawCanvas(stack, this.imageData);
-                return this;
-            };
             Renderer.prototype.render = function () {
                 this.ctx.putImageData(this.imageData, 0, 0);
             };
             Renderer.prototype.getCanvas = function () {
                 return this.canvas;
+            };
+            Renderer.prototype.getContext = function () {
+                return this.ctx;
+            };
+            Renderer.prototype.getImageData = function () {
+                return this.imageData;
+            };
+            Renderer.prototype.setImageData = function (v) {
+                this.imageData = v;
+            };
+            Renderer.prototype.applyFilterStack = function (stack) {
+                jsfx.IterableFilter.drawCanvas(stack, this);
+                return this;
             };
             Renderer.prototype.cleanUp = function () {
                 this.imageData = null;
@@ -242,7 +251,8 @@ var jsfx;
                     shader.uniforms(secondPass).drawRect();
                 });
             };
-            Blur.prototype.drawCanvas = function (imageData) {
+            Blur.prototype.drawCanvas = function (renderer) {
+                var imageData = renderer.getImageData();
                 var pixels = imageData.data;
                 var radius = this.properties.radius;
                 var width = imageData.width;
@@ -416,7 +426,6 @@ var jsfx;
                         yi += width;
                     }
                 }
-                return imageData;
             };
             return Blur;
         })(jsfx.Filter);
@@ -571,7 +580,8 @@ var jsfx;
                 this.green = green;
                 this.blue = blue;
             }
-            Curves.prototype.drawCanvas = function (imageData) {
+            Curves.prototype.drawCanvas = function (renderer) {
+                var imageData = renderer.getImageData();
                 var pixels = imageData.data;
                 var amount = this.properties.amount;
                 var r, g, b;
@@ -588,7 +598,6 @@ var jsfx;
                     pixels[i + 1] = g * 255;
                     pixels[i + 2] = b * 255;
                 }
-                return imageData;
             };
             Curves.splineInterpolate = function (points) {
                 var interpolator = new jsfx.util.SplineInterpolator(points);
@@ -754,26 +763,36 @@ var jsfx;
                 });
                 extraTexture.unuse(1);
             };
-            UnsharpMask.prototype.drawCanvas = function (imageData) {
-                var pixels = imageData.data;
+            /**
+             *
+             * @param renderer
+             */
+            UnsharpMask.prototype.drawCanvas = function (renderer) {
+                var original;
+                if (typeof window === 'undefined') {
+                    var src = renderer.getSource();
+                    var originalData = renderer.getContext().getImageData(0, 0, src.width, src.height);
+                    original = originalData.data;
+                }
+                else {
+                    original = new Uint8ClampedArray(renderer.getImageData().data);
+                }
                 // props
                 var radius = this.properties.radius;
                 var strength = this.properties.strength + 1;
-                // clone of data
-                // @todo: declared my own Uint8ClampedArray above since I am having issues with TypeScript.
-                // additionally, my previous called imageData.data.set(original) (which I also can't here because of TS mapping)
-                var original = new Uint8ClampedArray(imageData.data);
-                imageData.data = original;
                 // blur image
                 var blur = new filter.Blur(radius);
-                blur.drawCanvas(imageData);
+                blur.drawCanvas(renderer);
+                // get processed image data
+                var imageData = renderer.getImageData();
+                var pixels = imageData.data;
                 // trying to replicate mix() from webgl, which is basically x * (1 -a)
                 for (var i = 0; i < pixels.length; i += 4) {
                     pixels[i] = pixels[i] * (1 - strength) + original[i] * strength;
                     pixels[i + 1] = pixels[i + 1] * (1 - strength) + original[i + 1] * strength;
                     pixels[i + 2] = pixels[i + 2] * (1 - strength) + original[i + 2] * strength;
                 }
-                return imageData;
+                renderer.setImageData(imageData);
             };
             return UnsharpMask;
         })(jsfx.Filter);
@@ -1270,3 +1289,7 @@ var jsfx;
         webgl.Texture = Texture;
     })(webgl = jsfx.webgl || (jsfx.webgl = {}));
 })(jsfx || (jsfx = {}));
+var module = module;
+if (typeof module !== 'undefined') {
+    module.exports = jsfx;
+}
