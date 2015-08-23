@@ -617,6 +617,78 @@ var jsfx;
     var filter;
     (function (filter) {
         /**
+         * @todo While this filter is fast in WebGL, it is terribly slow in Canvas due to the complexity of the 9x9 box filter.
+         *
+         * @filter         Denoise
+         * @description    Smooths over grainy noise in dark images using an 9x9 box filter
+         *                 weighted by color intensity, similar to a bilateral filter.
+         * @param exponent The exponent of the color intensity difference, should be greater
+         *                 than zero. A value of zero just gives an 9x9 box blur and high values
+         *                 give the original image, but ideal values are usually around 10-20.
+         */
+        var Denoise = (function (_super) {
+            __extends(Denoise, _super);
+            function Denoise(exponent) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float exponent;\n            uniform float strength;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 center = texture2D(texture, texCoord);\n                vec4 color = vec4(0.0);\n                float total = 0.0;\n\n                for (float x = -4.0; x <= 4.0; x += 1.0) {\n                    for (float y = -4.0; y <= 4.0; y += 1.0) {\n                        vec4 sample = texture2D(texture, texCoord + vec2(x, y) / texSize);\n                        float weight = 1.0 - abs(dot(sample.rgb - center.rgb, vec3(0.25)));\n                        weight = pow(weight, exponent);\n                        color += sample * weight;\n                        total += weight;\n                    }\n                }\n\n                gl_FragColor = color / total;\n            }\n        ");
+                // set properties
+                this.properties.exponent = exponent;
+            }
+            Denoise.prototype.drawWebGL = function (renderer) {
+                var shader = renderer.getShader(this);
+                var properties = this.getProperties();
+                // add texture size
+                properties.texSize = [renderer.getSource().width, renderer.getSource().width];
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms(properties).drawRect();
+                });
+            };
+            Denoise.prototype.drawCanvas = function (renderer) {
+                var exponent = this.properties.exponent;
+                var imageData = renderer.getImageData();
+                var pixels = imageData.data;
+                var original = new Uint8ClampedArray(imageData.data);
+                // variables
+                var x, y, dstOff, color, total, cx, cy, scx, scy, srcOff, weight;
+                for (x = 0; x < imageData.width; x++) {
+                    for (y = 0; y < imageData.height; y++) {
+                        dstOff = (y * imageData.width + x) * 4;
+                        color = [0, 0, 0, 0];
+                        total = 0;
+                        for (cx = -4; cx <= 4; cx += 1) {
+                            for (cy = -4; cy <= 4; cy += 1) {
+                                scx = Math.min(imageData.width - 1, Math.max(0, x + cx));
+                                scy = Math.min(imageData.height - 1, Math.max(0, y + cy));
+                                srcOff = (scx + scy * imageData.width) * 4;
+                                // calculate the weight
+                                weight = Math.pow(1.0 - Math.abs((original[srcOff] / 255 - original[dstOff] / 255) * 0.25
+                                    + (original[srcOff + 1] / 255 - original[dstOff + 1] / 255) * 0.25
+                                    + (original[srcOff + 2] / 255 - original[dstOff + 2] / 255) * 0.25), exponent);
+                                // color += sample * weight
+                                color[0] += original[srcOff] / 255 * weight;
+                                color[1] += original[srcOff + 1] / 255 * weight;
+                                color[2] += original[srcOff + 2] / 255 * weight;
+                                color[3] += original[srcOff + 3] / 255 * weight;
+                                total += weight;
+                            }
+                        }
+                        pixels[dstOff] = (color[0] / total) * 255;
+                        pixels[dstOff + 1] = (color[1] / total) * 255;
+                        pixels[dstOff + 2] = (color[2] / total) * 255;
+                        pixels[dstOff + 3] = (color[3] / total) * 255;
+                    }
+                }
+            };
+            return Denoise;
+        })(jsfx.Filter);
+        filter.Denoise = Denoise;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
          * @filter           Hue / Saturation
          * @description      Provides rotational hue control. RGB color space
          *                   can be imagined as a cube where the axes are the red, green, and blue color
@@ -648,6 +720,44 @@ var jsfx;
             return Hue;
         })(jsfx.IterableFilter);
         filter.Hue = Hue;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter         Noise
+         * @description    Adds black and white noise to the image.
+         * @param amount   0 to 1 (0 for no effect, 1 for maximum noise)
+         */
+        var Noise = (function (_super) {
+            __extends(Noise, _super);
+            function Noise(amount) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            float rand(vec2 co) {\n                return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float diff = (rand(texCoord) - 0.5) * amount;\n                color.r += diff;\n                color.g += diff;\n                color.b += diff;\n\n                gl_FragColor = color;\n            }\n        ");
+                // set properties
+                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+            }
+            Noise.prototype.iterateCanvas = function (helper) {
+                var amount = this.properties.amount;
+                var width = helper.getImageData().width;
+                var x = (helper.getIndex() / 4) % width;
+                var y = Math.floor((helper.getIndex() / 4) / width);
+                var v = new jsfx.util.Vector2(x, y);
+                var diff = (Noise.rand(v) - 0.5) * amount;
+                helper.r += diff;
+                helper.g += diff;
+                helper.b += diff;
+            };
+            Noise.rand = function (v) {
+                return Noise.fract(Math.sin(v.dotScalars(12.9898, 78.233)) * 43758.5453);
+            };
+            Noise.fract = function (x) {
+                return x - Math.floor(x);
+            };
+            return Noise;
+        })(jsfx.IterableFilter);
+        filter.Noise = Noise;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
@@ -829,6 +939,9 @@ var jsfx;
             ImageDataHelper.prototype.getImageData = function () {
                 return this.imageData;
             };
+            ImageDataHelper.prototype.getIndex = function () {
+                return this.index;
+            };
             ImageDataHelper.prototype.save = function () {
                 this.imageData.data[this.index] = this.r * 255;
                 this.imageData.data[this.index + 1] = this.g * 255;
@@ -934,6 +1047,27 @@ var jsfx;
             return SplineInterpolator;
         })();
         util.SplineInterpolator = SplineInterpolator;
+    })(util = jsfx.util || (jsfx.util = {}));
+})(jsfx || (jsfx = {}));
+/**
+ * Vector2 Utility Class
+ *  -> Taken from https://github.com/mrdoob/three.js/blob/master/src/math/Vector2.js with only the functions we need.
+ */
+var jsfx;
+(function (jsfx) {
+    var util;
+    (function (util) {
+        var Vector2 = (function () {
+            function Vector2(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+            Vector2.prototype.dotScalars = function (x, y) {
+                return this.x * x + this.y * y;
+            };
+            return Vector2;
+        })();
+        util.Vector2 = Vector2;
     })(util = jsfx.util || (jsfx.util = {}));
 })(jsfx || (jsfx = {}));
 /**
