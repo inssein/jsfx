@@ -736,7 +736,7 @@ var jsfx;
             function Noise(amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            float rand(vec2 co) {\n                return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float diff = (rand(texCoord) - 0.5) * amount;\n                color.r += diff;\n                color.g += diff;\n                color.b += diff;\n\n                gl_FragColor = color;\n            }\n        ");
                 // set properties
-                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+                this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
             }
             Noise.prototype.iterateCanvas = function (helper) {
                 var amount = this.properties.amount;
@@ -910,7 +910,7 @@ var jsfx;
             function Vibrance(amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float average = (color.r + color.g + color.b) / 3.0;\n                float mx = max(color.r, max(color.g, color.b));\n                float amt = (mx - average) * (-amount * 3.0);\n                color.rgb = mix(color.rgb, vec3(mx), amt);\n                gl_FragColor = color;\n            }\n        ");
                 // set properties
-                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1);
             }
             Vibrance.prototype.iterateCanvas = function (helper) {
                 var amount = this.properties.amount;
@@ -921,6 +921,48 @@ var jsfx;
             return Vibrance;
         })(jsfx.IterableFilter);
         filter.Vibrance = Vibrance;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter         Vignette
+         * @description    Adds a simulated lens edge darkening effect.
+         * @param size     0 to 1 (0 for center of frame, 1 for edge of frame)
+         * @param amount   0 to 1 (0 for no effect, 1 for maximum lens darkening)
+         */
+        var Vignette = (function (_super) {
+            __extends(Vignette, _super);
+            function Vignette(size, amount) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float size;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float dist = distance(texCoord, vec2(0.5, 0.5));\n                color.rgb *= smoothstep(0.8, size * 0.799, dist * (amount + size));\n\n                gl_FragColor = color;\n            }\n        ");
+                // set properties
+                this.properties.size = jsfx.Filter.clamp(0, size, 1);
+                this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
+            }
+            Vignette.prototype.iterateCanvas = function (helper) {
+                var size = this.properties.size;
+                var amount = this.properties.amount;
+                var imageData = helper.getImageData();
+                var x = (helper.getIndex() / 4) % imageData.width;
+                var y = Math.floor((helper.getIndex() / 4) / imageData.width);
+                var distance = Vignette.distance(x / imageData.width, y / imageData.height, 0.5, 0.5);
+                var amount = Vignette.smoothstep(0.8, size * 0.799, distance * (amount + size));
+                helper.r *= amount;
+                helper.g *= amount;
+                helper.b *= amount;
+            };
+            Vignette.distance = function (x1, y1, x2, y2) {
+                return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+            };
+            Vignette.smoothstep = function (min, max, value) {
+                var x = Math.max(0, Math.min(1, (value - min) / (max - min)));
+                return x * x * (3 - 2 * x);
+            };
+            return Vignette;
+        })(jsfx.IterableFilter);
+        filter.Vignette = Vignette;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
