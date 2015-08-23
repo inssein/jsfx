@@ -5,8 +5,6 @@ namespace jsfx.filter {
    * @param amount   0 to 1 (0 for no effect, 1 for maximum noise)
    */
   export class Noise extends jsfx.IterableFilter {
-    protected width : number;
-
     constructor(amount : number) {
       super(null, `
             uniform sampler2D texture;
@@ -33,16 +31,11 @@ namespace jsfx.filter {
       this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
     }
 
-    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
-      this.width = renderer.getSource().width;
-
-      super.drawCanvas(renderer);
-    }
-
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
       var amount = this.properties.amount;
-      var x = (helper.getIndex() / 4) % this.width;
-      var y = Math.floor((helper.getIndex() / 4) / this.width);
+      var width = helper.getImageData().width;
+      var x = (helper.getIndex() / 4) % width;
+      var y = Math.floor((helper.getIndex() / 4) / width);
       var v : jsfx.util.Vector2 = new jsfx.util.Vector2(x, y);
       var diff = (Noise.rand(v) - 0.5) * amount;
 
