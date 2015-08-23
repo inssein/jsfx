@@ -527,11 +527,23 @@ var jsfx;
                 this.properties.angle = jsfx.Filter.clamp(0, angle, Math.PI / 2);
                 this.properties.scale = Math.PI / size;
             }
-            ColorHalfTone.prototype.pattern = function (angle, x, y, width, height) {
+            ColorHalfTone.prototype.drawWebGL = function (renderer) {
+                var shader = renderer.getShader(this);
+                var properties = this.getProperties();
+                // add texture size
+                properties.texSize = [renderer.getSource().width, renderer.getSource().width];
+                properties.center = [this.centerX, this.centerY];
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms(properties).drawRect();
+                });
+            };
+            ColorHalfTone.prototype.pattern = function (angle, x, y) {
                 // float s = sin(angle), c = cos(angle);
                 var s = Math.sin(angle);
                 var c = Math.cos(angle);
                 // vec2 tex = texCoord * texSize - center;
+                // texCoord in webgl is between 0 and 1
                 var tX = x - this.centerX;
                 var tY = y - this.centerY;
                 //vec2 point = vec2(
@@ -557,26 +569,15 @@ var jsfx;
                 g = (g - k) / (1 - k);
                 b = (b - k) / (1 - k);
                 // cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);
-                r = jsfx.Filter.clamp(0, r * 10 - 3 + this.pattern(angle + 0.26179, x, y, imageData.width, imageData.height), 1);
-                g = jsfx.Filter.clamp(0, g * 10 - 3 + this.pattern(angle + 1.30899, x, y, imageData.width, imageData.height), 1);
-                b = jsfx.Filter.clamp(0, b * 10 - 3 + this.pattern(angle, x, y, imageData.width, imageData.height), 1);
+                r = jsfx.Filter.clamp(0, r * 10 - 3 + this.pattern(angle + 0.26179, x, y), 1);
+                g = jsfx.Filter.clamp(0, g * 10 - 3 + this.pattern(angle + 1.30899, x, y), 1);
+                b = jsfx.Filter.clamp(0, b * 10 - 3 + this.pattern(angle, x, y), 1);
                 // k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);
-                k = jsfx.Filter.clamp(0, k * 10 - 5 + this.pattern(angle + 0.78539, x, y, imageData.width, imageData.height), 1);
+                k = jsfx.Filter.clamp(0, k * 10 - 5 + this.pattern(angle + 0.78539, x, y), 1);
                 // gl_FragColor = vec4(1.0 - cmy - k, color.a);
                 helper.r = 1 - r - k;
                 helper.g = 1 - g - k;
                 helper.b = 1 - b - k;
-            };
-            ColorHalfTone.prototype.drawWebGL = function (renderer) {
-                var shader = renderer.getShader(this);
-                var properties = this.getProperties();
-                // add texture size
-                properties.texSize = [renderer.getSource().width, renderer.getSource().width];
-                properties.center = [this.centerX, this.centerY];
-                renderer.getTexture().use();
-                renderer.getNextTexture().drawTo(function () {
-                    shader.uniforms(properties).drawRect();
-                });
             };
             return ColorHalfTone;
         })(jsfx.IterableFilter);
