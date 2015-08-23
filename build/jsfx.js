@@ -508,6 +508,86 @@ var jsfx;
     var filter;
     (function (filter) {
         /**
+         * @filter        Color Halftone
+         * @description   Simulates a CMYK halftone rendering of the image by multiplying pixel values
+         *                with a four rotated 2D sine wave patterns, one each for cyan, magenta, yellow,
+         *                and black.
+         * @param centerX The x coordinate of the pattern origin.
+         * @param centerY The y coordinate of the pattern origin.
+         * @param angle   The rotation of the pattern in radians.
+         * @param size    The diameter of a dot in pixels.
+         */
+        var ColorHalfTone = (function (_super) {
+            __extends(ColorHalfTone, _super);
+            function ColorHalfTone(centerX, centerY, angle, size) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern(float angle) {\n                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                vec3 cmy = 1.0 - color.rgb;\n                float k = min(cmy.x, min(cmy.y, cmy.z));\n                cmy = (cmy - k) / (1.0 - k);\n                cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);\n                k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);\n                gl_FragColor = vec4(1.0 - cmy - k, color.a);\n            }\n        ");
+                this.centerX = centerX;
+                this.centerY = centerY;
+                // set properties
+                this.properties.angle = jsfx.Filter.clamp(0, angle, Math.PI / 2);
+                this.properties.scale = Math.PI / size;
+            }
+            ColorHalfTone.prototype.pattern = function (angle, x, y, width, height) {
+                // float s = sin(angle), c = cos(angle);
+                var s = Math.sin(angle);
+                var c = Math.cos(angle);
+                // vec2 tex = texCoord * texSize - center;
+                var tX = x - this.centerX;
+                var tY = y - this.centerY;
+                //vec2 point = vec2(
+                //    c * tex.x - s * tex.y,
+                //    s * tex.x + c * tex.y
+                //  ) * scale;
+                //return (sin(point.x) * sin(point.y)) * 4.0;
+                return (Math.sin((c * tX - s * tY) * this.properties.scale) * Math.sin((s * tX + c * tY) * this.properties.scale)) * 4;
+            };
+            ColorHalfTone.prototype.iterateCanvas = function (helper) {
+                var angle = this.properties.angle;
+                var imageData = helper.getImageData();
+                var x = (helper.getIndex() / 4) % imageData.width;
+                var y = Math.floor((helper.getIndex() / 4) / imageData.width);
+                // vec3 cmy = 1.0 - color.rgb;
+                var r = 1 - helper.r;
+                var g = 1 - helper.g;
+                var b = 1 - helper.b;
+                // float k = min(cmy.x, min(cmy.y, cmy.z));
+                var k = Math.min(r, Math.min(g, b));
+                // cmy = (cmy - k) / (1.0 - k);
+                r = (r - k) / (1 - k);
+                g = (g - k) / (1 - k);
+                b = (b - k) / (1 - k);
+                // cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);
+                r = jsfx.Filter.clamp(0, r * 10 - 3 + this.pattern(angle + 0.26179, x, y, imageData.width, imageData.height), 1);
+                g = jsfx.Filter.clamp(0, g * 10 - 3 + this.pattern(angle + 1.30899, x, y, imageData.width, imageData.height), 1);
+                b = jsfx.Filter.clamp(0, b * 10 - 3 + this.pattern(angle, x, y, imageData.width, imageData.height), 1);
+                // k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);
+                k = jsfx.Filter.clamp(0, k * 10 - 5 + this.pattern(angle + 0.78539, x, y, imageData.width, imageData.height), 1);
+                // gl_FragColor = vec4(1.0 - cmy - k, color.a);
+                helper.r = 1 - r - k;
+                helper.g = 1 - g - k;
+                helper.b = 1 - b - k;
+            };
+            ColorHalfTone.prototype.drawWebGL = function (renderer) {
+                var shader = renderer.getShader(this);
+                var properties = this.getProperties();
+                // add texture size
+                properties.texSize = [renderer.getSource().width, renderer.getSource().width];
+                properties.center = [this.centerX, this.centerY];
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms(properties).drawRect();
+                });
+            };
+            return ColorHalfTone;
+        })(jsfx.IterableFilter);
+        filter.ColorHalfTone = ColorHalfTone;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
          * @filter           Contrast
          * @description      Provides multiplicative contrast control.
          * @param contrast   -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
