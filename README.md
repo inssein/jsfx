@@ -14,8 +14,6 @@ Demo: http://jsfx.inssein.com
 
 # todo
 
-* Need to move jsfx.Filter and jsfx.FilterInterface into the jsfx.filter namespace, but the compilation doesn't work 
-  as the single output file is not ordered (BrightnessContrast gets defined before the interface or base class)
 * Get feedback on usage of Typescript (the way files are separated, lack of Uint8TypedArray in UnsharpMask, etc).
 * Figure out how to have certain static variables per WebGL Rendering context. I am currently casting to any, and 
   assigning a variable. (vertexBuffer and texCoordBuffer in Shader, frameBuffer in Texture, and shaderCache in Renderer)
@@ -24,7 +22,6 @@ Demo: http://jsfx.inssein.com
   single files as well as mentioning it in the credits.
 * Add tests
 * Test server side rendering with node-canvas, and add documentation
-* Add minified build
 
 # future
 * Currently, only the Canvas filters take advantage of IterableFilter. Perhaps implement something similar for WebGL 
