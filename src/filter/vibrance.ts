@@ -21,7 +21,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+      this.properties.amount = jsfx.Filter.clamp(-1, amount, 1);
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
