@@ -26,6 +26,7 @@ namespace jsfx.filter {
                     c * tex.x - s * tex.y,
                     s * tex.x + c * tex.y
                 ) * scale;
+
                 return (sin(point.x) * sin(point.y)) * 4.0;
             }
 
@@ -59,23 +60,22 @@ namespace jsfx.filter {
       });
     }
 
-    protected pattern(angle : number, x : number, y : number) {
+    public static pattern(angle : number, x : number, y : number, centerX : number, centerY : number, scale : number) {
       // float s = sin(angle), c = cos(angle);
       var s : number = Math.sin(angle);
       var c : number = Math.cos(angle);
 
       // vec2 tex = texCoord * texSize - center;
       // texCoord in webgl is between 0 and 1
-      var tX : number = x - this.centerX;
-      var tY : number = y - this.centerY;
+      var tX : number = x - centerX;
+      var tY : number = y - centerY;
 
       //vec2 point = vec2(
       //    c * tex.x - s * tex.y,
       //    s * tex.x + c * tex.y
       //  ) * scale;
       //return (sin(point.x) * sin(point.y)) * 4.0;
-      return (Math.sin((c * tX - s * tY) * this.properties.scale) * Math.sin((s * tX + c * tY) * this.properties.scale)) * 4;
-
+      return (Math.sin((c * tX - s * tY) * scale) * Math.sin((s * tX + c * tY) * scale)) * 4;
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
@@ -83,6 +83,9 @@ namespace jsfx.filter {
       var imageData = helper.getImageData();
       var x = (helper.getIndex() / 4) % imageData.width;
       var y = Math.floor((helper.getIndex() / 4) / imageData.width);
+      var pattern = (angle : number) : number => {
+        return ColorHalfTone.pattern(angle, x, y, this.centerX, this.centerY, this.properties.scale);
+      };
 
       // vec3 cmy = 1.0 - color.rgb;
       var r = 1 - helper.r;
@@ -98,12 +101,12 @@ namespace jsfx.filter {
       b = (b - k) / (1 - k);
 
       // cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);
-      r = Filter.clamp(0, r * 10 - 3 + this.pattern(angle + 0.26179, x, y), 1);
-      g = Filter.clamp(0, g * 10 - 3 + this.pattern(angle + 1.30899, x, y), 1);
-      b = Filter.clamp(0, b * 10 - 3 + this.pattern(angle, x, y), 1);
+      r = Filter.clamp(0, r * 10 - 3 + pattern(angle + 0.26179), 1);
+      g = Filter.clamp(0, g * 10 - 3 + pattern(angle + 1.30899), 1);
+      b = Filter.clamp(0, b * 10 - 3 + pattern(angle), 1);
 
       // k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);
-      k = Filter.clamp(0, k * 10 - 5 + this.pattern(angle + 0.78539, x, y), 1);
+      k = Filter.clamp(0, k * 10 - 5 + pattern(angle + 0.78539), 1);
 
       // gl_FragColor = vec4(1.0 - cmy - k, color.a);
       helper.r = 1 - r - k;
