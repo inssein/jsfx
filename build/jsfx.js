@@ -520,7 +520,7 @@ var jsfx;
         var ColorHalfTone = (function (_super) {
             __extends(ColorHalfTone, _super);
             function ColorHalfTone(centerX, centerY, angle, size) {
-                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern(float angle) {\n                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                vec3 cmy = 1.0 - color.rgb;\n                float k = min(cmy.x, min(cmy.y, cmy.z));\n                cmy = (cmy - k) / (1.0 - k);\n                cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);\n                k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);\n                gl_FragColor = vec4(1.0 - cmy - k, color.a);\n            }\n        ");
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern(float angle) {\n                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                vec3 cmy = 1.0 - color.rgb;\n                float k = min(cmy.x, min(cmy.y, cmy.z));\n                cmy = (cmy - k) / (1.0 - k);\n                cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);\n                k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);\n                gl_FragColor = vec4(1.0 - cmy - k, color.a);\n            }\n        ");
                 this.centerX = centerX;
                 this.centerY = centerY;
                 // set properties
@@ -538,26 +538,30 @@ var jsfx;
                     shader.uniforms(properties).drawRect();
                 });
             };
-            ColorHalfTone.prototype.pattern = function (angle, x, y) {
+            ColorHalfTone.pattern = function (angle, x, y, centerX, centerY, scale) {
                 // float s = sin(angle), c = cos(angle);
                 var s = Math.sin(angle);
                 var c = Math.cos(angle);
                 // vec2 tex = texCoord * texSize - center;
                 // texCoord in webgl is between 0 and 1
-                var tX = x - this.centerX;
-                var tY = y - this.centerY;
+                var tX = x - centerX;
+                var tY = y - centerY;
                 //vec2 point = vec2(
                 //    c * tex.x - s * tex.y,
                 //    s * tex.x + c * tex.y
                 //  ) * scale;
                 //return (sin(point.x) * sin(point.y)) * 4.0;
-                return (Math.sin((c * tX - s * tY) * this.properties.scale) * Math.sin((s * tX + c * tY) * this.properties.scale)) * 4;
+                return (Math.sin((c * tX - s * tY) * scale) * Math.sin((s * tX + c * tY) * scale)) * 4;
             };
             ColorHalfTone.prototype.iterateCanvas = function (helper) {
+                var _this = this;
                 var angle = this.properties.angle;
                 var imageData = helper.getImageData();
                 var x = (helper.getIndex() / 4) % imageData.width;
                 var y = Math.floor((helper.getIndex() / 4) / imageData.width);
+                var pattern = function (angle) {
+                    return ColorHalfTone.pattern(angle, x, y, _this.centerX, _this.centerY, _this.properties.scale);
+                };
                 // vec3 cmy = 1.0 - color.rgb;
                 var r = 1 - helper.r;
                 var g = 1 - helper.g;
@@ -569,11 +573,11 @@ var jsfx;
                 g = (g - k) / (1 - k);
                 b = (b - k) / (1 - k);
                 // cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);
-                r = jsfx.Filter.clamp(0, r * 10 - 3 + this.pattern(angle + 0.26179, x, y), 1);
-                g = jsfx.Filter.clamp(0, g * 10 - 3 + this.pattern(angle + 1.30899, x, y), 1);
-                b = jsfx.Filter.clamp(0, b * 10 - 3 + this.pattern(angle, x, y), 1);
+                r = jsfx.Filter.clamp(0, r * 10 - 3 + pattern(angle + 0.26179), 1);
+                g = jsfx.Filter.clamp(0, g * 10 - 3 + pattern(angle + 1.30899), 1);
+                b = jsfx.Filter.clamp(0, b * 10 - 3 + pattern(angle), 1);
                 // k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);
-                k = jsfx.Filter.clamp(0, k * 10 - 5 + this.pattern(angle + 0.78539, x, y), 1);
+                k = jsfx.Filter.clamp(0, k * 10 - 5 + pattern(angle + 0.78539), 1);
                 // gl_FragColor = vec4(1.0 - cmy - k, color.a);
                 helper.r = 1 - r - k;
                 helper.g = 1 - g - k;
@@ -763,6 +767,59 @@ var jsfx;
             return Denoise;
         })(jsfx.Filter);
         filter.Denoise = Denoise;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter        Color Halftone
+         * @description   Simulates a CMYK halftone rendering of the image by multiplying pixel values
+         *                with a four rotated 2D sine wave patterns, one each for cyan, magenta, yellow,
+         *                and black.
+         * @param centerX The x coordinate of the pattern origin.
+         * @param centerY The y coordinate of the pattern origin.
+         * @param angle   The rotation of the pattern in radians.
+         * @param size    The diameter of a dot in pixels.
+         */
+        var DotScreen = (function (_super) {
+            __extends(DotScreen, _super);
+            function DotScreen(centerX, centerY, angle, size) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern() {                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float average = (color.r + color.g + color.b) / 3.0;\n                gl_FragColor = vec4(vec3(average * 10.0 - 5.0 + pattern()), color.a);\n            }\n        ");
+                this.centerX = centerX;
+                this.centerY = centerY;
+                // set properties
+                this.properties.angle = jsfx.Filter.clamp(0, angle, Math.PI / 2);
+                this.properties.scale = Math.PI / size;
+            }
+            DotScreen.prototype.drawWebGL = function (renderer) {
+                var shader = renderer.getShader(this);
+                var properties = this.getProperties();
+                // add texture size
+                properties.texSize = [renderer.getSource().width, renderer.getSource().width];
+                properties.center = [this.centerX, this.centerY];
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms(properties).drawRect();
+                });
+            };
+            DotScreen.prototype.iterateCanvas = function (helper) {
+                var imageData = helper.getImageData();
+                var x = (helper.getIndex() / 4) % imageData.width;
+                var y = Math.floor((helper.getIndex() / 4) / imageData.width);
+                // float average = (color.r + color.g + color.b) / 3.0;
+                var average = (helper.r + helper.g + helper.b) / 3;
+                // gl_FragColor = vec4(vec3(average * 10.0 - 5.0 + pattern()), color.a);
+                var pattern = filter.ColorHalfTone.pattern(this.properties.angle, x, y, this.centerX, this.centerY, this.properties.scale);
+                var value = average * 10 - 5 + pattern;
+                helper.r = value;
+                helper.g = value;
+                helper.b = value;
+            };
+            return DotScreen;
+        })(jsfx.IterableFilter);
+        filter.DotScreen = DotScreen;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
