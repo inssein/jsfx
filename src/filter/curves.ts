@@ -18,7 +18,7 @@ namespace jsfx.filter {
    * @param blue  (optional) A list of points that define the function for the blue
    *              channel (just like for red).
    */
-  export class Curves extends jsfx.Filter {
+  export class Curves extends jsfx.IterableFilter {
     constructor(private red : number[], private green : number[], private blue : number[]) {
       super(null, `
             uniform sampler2D texture;
@@ -49,27 +49,43 @@ namespace jsfx.filter {
       this.blue = blue;
     }
 
-    public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
-      var imageData : ImageData = renderer.getImageData();
-      var pixels : number[] = imageData.data;
-      var amount : number = this.properties.amount;
-      var r : number, g : number, b : number;
-
-      for (var i = 0; i < pixels.length; i += 4) {
-        // get color values
-        r = pixels[i] / 255;
-        g = pixels[i + 1] / 255;
-        b = pixels[i + 2] / 255;
-
-        r = Math.min(1.0, (r * (1 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount)));
-        g = Math.min(1.0, (r * 0.349 * amount) + (g * (1 - (0.314 * amount))) + (b * 0.168 * amount));
-        b = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1 - (0.869 * amount))));
-
-        // set values
-        pixels[i] = r * 255;
-        pixels[i + 1] = g * 255;
-        pixels[i + 2] = b * 255;
+    drawWebGL(renderer : jsfx.webgl.Renderer) : void {
+      // create texture data
+      var array = [];
+      for (var i = 0; i < 256; i++) {
+          array.splice(array.length, 0, this.red[i], this.green[i], this.blue[i], 255);
       }
+
+      // create a new texture
+      var extraTexture = renderer.createTexture();
+
+      // set ramp texture data
+      extraTexture.initFromBytes(256, 1, array);
+
+      // use the texture
+      extraTexture.use(1);
+
+      // get the shader
+      var shader = renderer.getShader(this);
+
+      // set shader textures
+      shader.textures({
+          map: 1
+      });
+
+      // render
+      renderer.getTexture().use();
+      renderer.getNextTexture().drawTo(function () {
+          shader.uniforms({}).drawRect();
+      });
+    }
+
+    public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
+      var i : number = helper.getIndex();
+
+      helper.r = this.red[helper.r * 255] / 255;
+      helper.g = this.green[helper.g * 255] / 255;
+      helper.b = this.blue[helper.b * 255] / 255;
     }
 
     static splineInterpolate(points) {
