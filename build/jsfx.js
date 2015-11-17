@@ -54,8 +54,7 @@ var jsfx;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var jsfx;
 (function (jsfx) {
@@ -665,24 +664,35 @@ var jsfx;
                 this.green = green;
                 this.blue = blue;
             }
-            Curves.prototype.drawCanvas = function (renderer) {
-                var imageData = renderer.getImageData();
-                var pixels = imageData.data;
-                var amount = this.properties.amount;
-                var r, g, b;
-                for (var i = 0; i < pixels.length; i += 4) {
-                    // get color values
-                    r = pixels[i] / 255;
-                    g = pixels[i + 1] / 255;
-                    b = pixels[i + 2] / 255;
-                    r = Math.min(1.0, (r * (1 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount)));
-                    g = Math.min(1.0, (r * 0.349 * amount) + (g * (1 - (0.314 * amount))) + (b * 0.168 * amount));
-                    b = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1 - (0.869 * amount))));
-                    // set values
-                    pixels[i] = r * 255;
-                    pixels[i + 1] = g * 255;
-                    pixels[i + 2] = b * 255;
+            Curves.prototype.drawWebGL = function (renderer) {
+                // create texture data
+                var array = [];
+                for (var i = 0; i < 256; i++) {
+                    array.splice(array.length, 0, this.red[i], this.green[i], this.blue[i], 255);
                 }
+                // create a new texture
+                var extraTexture = renderer.createTexture();
+                // set ramp texture data
+                extraTexture.initFromBytes(256, 1, array);
+                // use the texture
+                extraTexture.use(1);
+                // get the shader
+                var shader = renderer.getShader(this);
+                // set shader textures
+                shader.textures({
+                    map: 1
+                });
+                // render
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms({}).drawRect();
+                });
+            };
+            Curves.prototype.iterateCanvas = function (helper) {
+                var i = helper.getIndex();
+                helper.r = this.red[helper.r * 255] / 255;
+                helper.g = this.green[helper.g * 255] / 255;
+                helper.b = this.blue[helper.b * 255] / 255;
             };
             Curves.splineInterpolate = function (points) {
                 var interpolator = new jsfx.util.SplineInterpolator(points);
@@ -693,7 +703,7 @@ var jsfx;
                 return array;
             };
             return Curves;
-        })(jsfx.Filter);
+        })(jsfx.IterableFilter);
         filter.Curves = Curves;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -858,6 +868,35 @@ var jsfx;
             return Hue;
         })(jsfx.IterableFilter);
         filter.Hue = Hue;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var filter;
+    (function (filter) {
+        /**
+         * @filter           Multiply
+         */
+        var Multiply = (function (_super) {
+            __extends(Multiply, _super);
+            function Multiply(r, g, b) {
+                _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float r;\n            uniform float g;\n            uniform float b;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                color.r *= r;\n                color.g *= g;\n                color.b *= b;\n\n                gl_FragColor = color;\n            }\n        ");
+                this.r = r;
+                this.g = g;
+                this.b = b;
+                // set properties
+                this.properties.r = jsfx.Filter.clamp(0, r, 1);
+                this.properties.g = jsfx.Filter.clamp(0, g, 1);
+                this.properties.b = jsfx.Filter.clamp(0, b, 1);
+            }
+            Multiply.prototype.iterateCanvas = function (helper) {
+                helper.r *= this.properties.r;
+                helper.g *= this.properties.g;
+                helper.b *= this.properties.b;
+            };
+            return Multiply;
+        })(jsfx.IterableFilter);
+        filter.Multiply = Multiply;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
