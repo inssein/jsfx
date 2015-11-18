@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "out": "jsfx.js",
+    "target": "ES5"
+  },
+  "files": [
+    "src/filter/filterInterface.ts",
+    "src/filter/filter.ts",
+    "src/filter/iterableFilterInterface.ts",
+    "src/filter/iterableFilter.ts",
+    "src/**/*.ts"
+  ]
+}

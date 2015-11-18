@@ -1,10 +1,10 @@
 var gulp = require('gulp');
-var tsc = require('gulp-tsc');
 var shell = require('gulp-shell');
 var runseq = require('run-sequence');
 var tslint = require('gulp-tslint');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
+var tsproject = require('tsproject');
 
 var paths = {
   tscripts: {
@@ -39,17 +39,21 @@ gulp.task('watchrun', function() {
 
 gulp.task('build', ['compile:typescript']);
 gulp.task('compile:typescript', function() {
-  return gulp
-    .src(paths.tscripts.src)
-    .pipe(tsc({
-      module: "commonjs",
-      out:    "jsfx.js",
-      target: "ES5"
-    }))
-    .pipe(gulp.dest(paths.tscripts.dest))
-    .pipe(uglify())
-    .pipe(rename({ extname: '.min.js' }))
+  tsproject
+    .src('.')
     .pipe(gulp.dest(paths.tscripts.dest));
+
+  //return gulp
+  //  .src(paths.tscripts.src)
+  //  .pipe(tsc({
+  //    module: "commonjs",
+  //    out:    "jsfx.js",
+  //    target: "ES5"
+  //  }))
+  //  .pipe(gulp.dest(paths.tscripts.dest))
+  //  .pipe(uglify())
+  //  .pipe(rename({ extname: '.min.js' }))
+  //  .pipe(gulp.dest(paths.tscripts.dest));
 });
 
 // ** Linting ** //
