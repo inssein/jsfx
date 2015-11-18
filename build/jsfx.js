@@ -1,55 +1,43 @@
+/// <reference path="filterInterface.ts"/>
 var jsfx;
 (function (jsfx) {
-    var Filter = (function () {
-        function Filter(vertexSource, fragmentSource) {
-            if (vertexSource === void 0) { vertexSource = null; }
-            if (fragmentSource === void 0) { fragmentSource = null; }
-            this.vertexSource = vertexSource;
-            this.fragmentSource = fragmentSource;
-            this.properties = {};
-        }
-        /**
-         * Returns all the properties of the shader. Useful for drawWebGl when are are just passing along data
-         * to the shader.
-         *
-         * @returns {{}|*}
-         */
-        Filter.prototype.getProperties = function () {
-            return this.properties;
-        };
-        /**
-         * The javascript implementation of the filter
-         *
-         * @param renderer
-         */
-        Filter.prototype.drawCanvas = function (renderer) {
-            throw new Error("Must be implemented");
-        };
-        /**
-         * The WebGL implementation of the filter
-         *
-         * @param renderer
-         */
-        Filter.prototype.drawWebGL = function (renderer) {
-            var shader = renderer.getShader(this);
-            var properties = this.getProperties();
-            renderer.getTexture().use();
-            renderer.getNextTexture().drawTo(function () {
-                shader.uniforms(properties).drawRect();
-            });
-        };
-        Filter.prototype.getVertexSource = function () {
-            return this.vertexSource;
-        };
-        Filter.prototype.getFragmentSource = function () {
-            return this.fragmentSource;
-        };
-        Filter.clamp = function (low, value, high) {
-            return Math.max(low, Math.min(value, high));
-        };
-        return Filter;
-    })();
-    jsfx.Filter = Filter;
+    var filter;
+    (function (filter) {
+        var Filter = (function () {
+            function Filter(vertexSource, fragmentSource) {
+                if (vertexSource === void 0) { vertexSource = null; }
+                if (fragmentSource === void 0) { fragmentSource = null; }
+                this.vertexSource = vertexSource;
+                this.fragmentSource = fragmentSource;
+                this.properties = {};
+            }
+            Filter.prototype.getProperties = function () {
+                return this.properties;
+            };
+            Filter.prototype.drawCanvas = function (renderer) {
+                throw new Error("Must be implemented");
+            };
+            Filter.prototype.drawWebGL = function (renderer) {
+                var shader = renderer.getShader(this);
+                var properties = this.getProperties();
+                renderer.getTexture().use();
+                renderer.getNextTexture().drawTo(function () {
+                    shader.uniforms(properties).drawRect();
+                });
+            };
+            Filter.prototype.getVertexSource = function () {
+                return this.vertexSource;
+            };
+            Filter.prototype.getFragmentSource = function () {
+                return this.fragmentSource;
+            };
+            Filter.clamp = function (low, value, high) {
+                return Math.max(low, Math.min(value, high));
+            };
+            return Filter;
+        })();
+        filter.Filter = Filter;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -58,77 +46,34 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var jsfx;
 (function (jsfx) {
-    var IterableFilter = (function (_super) {
-        __extends(IterableFilter, _super);
-        function IterableFilter() {
-            _super.apply(this, arguments);
-        }
-        IterableFilter.prototype.drawCanvas = function (renderer) {
-            return IterableFilter.drawCanvas([this], renderer);
-        };
-        IterableFilter.prototype.iterateCanvas = function (imageData) {
-            throw new Error("Must be implemented");
-        };
-        IterableFilter.drawCanvas = function (filters, renderer) {
-            var helper;
-            var imageData = renderer.getImageData();
-            for (var i = 0; i < imageData.data.length; i += 4) {
-                helper = new jsfx.util.ImageDataHelper(imageData, i);
-                filters.forEach(function (filter) {
-                    filter.iterateCanvas(helper);
-                });
-                helper.save();
+    var filter;
+    (function (filter_1) {
+        var IterableFilter = (function (_super) {
+            __extends(IterableFilter, _super);
+            function IterableFilter() {
+                _super.apply(this, arguments);
             }
-        };
-        return IterableFilter;
-    })(jsfx.Filter);
-    jsfx.IterableFilter = IterableFilter;
-})(jsfx || (jsfx = {}));
-var jsfx;
-(function (jsfx) {
-    var hasWebGL = (function () {
-        try {
-            var canvas = document.createElement("canvas");
-            return !!(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
-        }
-        catch (e) {
-            return false;
-        }
-    })();
-    function Renderer(type) {
-        if (!type) {
-            type = hasWebGL ? "webgl" : "canvas";
-        }
-        if (type === "webgl") {
-            return new jsfx.webgl.Renderer();
-        }
-        return new jsfx.canvas.Renderer();
-    }
-    jsfx.Renderer = Renderer;
-})(jsfx || (jsfx = {}));
-var jsfx;
-(function (jsfx) {
-    var Source = (function () {
-        function Source(element) {
-            this.element = element;
-        }
-        Object.defineProperty(Source.prototype, "width", {
-            get: function () {
-                return this.element.width;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Source.prototype, "height", {
-            get: function () {
-                return this.element.height;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return Source;
-    })();
-    jsfx.Source = Source;
+            IterableFilter.prototype.drawCanvas = function (renderer) {
+                return IterableFilter.drawCanvas([this], renderer);
+            };
+            IterableFilter.prototype.iterateCanvas = function (imageData) {
+                throw new Error("Must be implemented");
+            };
+            IterableFilter.drawCanvas = function (filters, renderer) {
+                var helper;
+                var imageData = renderer.getImageData();
+                for (var i = 0; i < imageData.data.length; i += 4) {
+                    helper = new jsfx.util.ImageDataHelper(imageData, i);
+                    filters.forEach(function (filter) {
+                        filter.iterateCanvas(helper);
+                    });
+                    helper.save();
+                }
+            };
+            return IterableFilter;
+        })(filter_1.Filter);
+        filter_1.IterableFilter = IterableFilter;
+    })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
 var jsfx;
 (function (jsfx) {
@@ -142,17 +87,13 @@ var jsfx;
                 this.imageData = null;
             }
             Renderer.prototype.setSource = function (source) {
-                // first, clean up
                 if (this.source) {
                     this.cleanUp();
                 }
-                // re-set data and start rendering
                 this.source = source;
                 this.canvas.width = source.width;
                 this.canvas.height = source.height;
-                // draw the image on to a canvas we can manipulate
                 this.ctx.drawImage(source.element, 0, 0, source.width, source.height);
-                // store the pixels
                 this.imageData = this.ctx.getImageData(0, 0, source.width, source.height);
                 return this;
             };
@@ -168,20 +109,17 @@ var jsfx;
                 var filter;
                 for (var i = 0; i < filters.length; i++) {
                     filter = filters[i];
-                    if (filter instanceof jsfx.IterableFilter) {
+                    if (filter instanceof jsfx.filter.IterableFilter) {
                         stack.push(filter);
                     }
                     else {
-                        // if there if something in the stack, apply that first
                         if (stack.length > 0) {
                             this.applyFilterStack(stack);
                             stack = [];
                         }
-                        // apply current filter
                         this.applyFilter(filter);
                     }
                 }
-                // if there is still a stack left, apply it
                 if (stack.length > 0) {
                     this.applyFilterStack(stack);
                 }
@@ -203,7 +141,7 @@ var jsfx;
                 this.imageData = v;
             };
             Renderer.prototype.applyFilterStack = function (stack) {
-                jsfx.IterableFilter.drawCanvas(stack, this);
+                jsfx.filter.IterableFilter.drawCanvas(stack, this);
                 return this;
             };
             Renderer.prototype.cleanUp = function () {
@@ -224,17 +162,10 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter         Blur
-         * @description    This is the TriangleBlur from glfx, but for the canvas implementation, we are cheating by
-         *                 using StackBlur. The implementations are obviously very different, but the results are very close.
-         * @param radius   The radius of the pyramid convolved with the image.
-         */
         var Blur = (function (_super) {
             __extends(Blur, _super);
             function Blur(radius) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 delta;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = vec4(0.0);\n                float total = 0.0;\n\n                /* randomize the lookup values to hide the fixed number of samples */\n                //float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);\n\n                vec3 scale = vec3(12.9898, 78.233, 151.7182);\n                float offset = fract(sin(dot(gl_FragCoord.xyz + 0.0, scale)) * 43758.5453 + 0.0);\n\n                for (float t = -30.0; t <= 30.0; t++) {\n                    float percent = (t + offset - 0.5) / 30.0;\n                    float weight = 1.0 - abs(percent);\n                    vec4 sample = texture2D(texture, texCoord + delta * percent);\n\n                    /* switch to pre-multiplied alpha to correctly blur transparent images */\n                    sample.rgb *= sample.a;\n\n                    color += sample * weight;\n                    total += weight;\n                }\n\n                gl_FragColor = color / total;\n\n                /* switch back from pre-multiplied alpha */\n                gl_FragColor.rgb /= gl_FragColor.a + 0.00001;\n            }\n        ");
-                // set properties
                 this.properties.radius = radius;
             }
             Blur.prototype.drawWebGL = function (renderer) {
@@ -427,7 +358,7 @@ var jsfx;
                 }
             };
             return Blur;
-        })(jsfx.Filter);
+        })(filter.Filter);
         filter.Blur = Blur;
         var mul_table = [
             512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292, 512,
@@ -479,17 +410,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter           Brightness
-         * @description      Provides additive brightness control.
-         * @param brightness -1 to 1 (-1 is solid black, 0 is no change, and 1 is solid white)
-         */
         var Brightness = (function (_super) {
             __extends(Brightness, _super);
             function Brightness(brightness) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float brightness;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                color.rgb += brightness;\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.brightness = jsfx.Filter.clamp(-1, brightness, 1) || 0;
+                this.properties.brightness = filter.Filter.clamp(-1, brightness, 1) || 0;
             }
             Brightness.prototype.iterateCanvas = function (helper) {
                 var brightness = this.properties.brightness;
@@ -498,7 +423,7 @@ var jsfx;
                 helper.b += brightness;
             };
             return Brightness;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Brightness = Brightness;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -506,30 +431,18 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter        Color Halftone
-         * @description   Simulates a CMYK halftone rendering of the image by multiplying pixel values
-         *                with a four rotated 2D sine wave patterns, one each for cyan, magenta, yellow,
-         *                and black.
-         * @param centerX The x coordinate of the pattern origin.
-         * @param centerY The y coordinate of the pattern origin.
-         * @param angle   The rotation of the pattern in radians.
-         * @param size    The diameter of a dot in pixels.
-         */
         var ColorHalfTone = (function (_super) {
             __extends(ColorHalfTone, _super);
             function ColorHalfTone(centerX, centerY, angle, size) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern(float angle) {\n                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                vec3 cmy = 1.0 - color.rgb;\n                float k = min(cmy.x, min(cmy.y, cmy.z));\n                cmy = (cmy - k) / (1.0 - k);\n                cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);\n                k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);\n                gl_FragColor = vec4(1.0 - cmy - k, color.a);\n            }\n        ");
                 this.centerX = centerX;
                 this.centerY = centerY;
-                // set properties
-                this.properties.angle = jsfx.Filter.clamp(0, angle, Math.PI / 2);
+                this.properties.angle = filter.Filter.clamp(0, angle, Math.PI / 2);
                 this.properties.scale = Math.PI / size;
             }
             ColorHalfTone.prototype.drawWebGL = function (renderer) {
                 var shader = renderer.getShader(this);
                 var properties = this.getProperties();
-                // add texture size
                 properties.texSize = [renderer.getSource().width, renderer.getSource().width];
                 properties.center = [this.centerX, this.centerY];
                 renderer.getTexture().use();
@@ -538,18 +451,10 @@ var jsfx;
                 });
             };
             ColorHalfTone.pattern = function (angle, x, y, centerX, centerY, scale) {
-                // float s = sin(angle), c = cos(angle);
                 var s = Math.sin(angle);
                 var c = Math.cos(angle);
-                // vec2 tex = texCoord * texSize - center;
-                // texCoord in webgl is between 0 and 1
                 var tX = x - centerX;
                 var tY = y - centerY;
-                //vec2 point = vec2(
-                //    c * tex.x - s * tex.y,
-                //    s * tex.x + c * tex.y
-                //  ) * scale;
-                //return (sin(point.x) * sin(point.y)) * 4.0;
                 return (Math.sin((c * tX - s * tY) * scale) * Math.sin((s * tX + c * tY) * scale)) * 4;
             };
             ColorHalfTone.prototype.iterateCanvas = function (helper) {
@@ -561,29 +466,23 @@ var jsfx;
                 var pattern = function (angle) {
                     return ColorHalfTone.pattern(angle, x, y, _this.centerX, _this.centerY, _this.properties.scale);
                 };
-                // vec3 cmy = 1.0 - color.rgb;
                 var r = 1 - helper.r;
                 var g = 1 - helper.g;
                 var b = 1 - helper.b;
-                // float k = min(cmy.x, min(cmy.y, cmy.z));
                 var k = Math.min(r, Math.min(g, b));
-                // cmy = (cmy - k) / (1.0 - k);
                 r = (r - k) / (1 - k);
                 g = (g - k) / (1 - k);
                 b = (b - k) / (1 - k);
-                // cmy = clamp(cmy * 10.0 - 3.0 + vec3(pattern(angle + 0.26179), pattern(angle + 1.30899), pattern(angle)), 0.0, 1.0);
-                r = jsfx.Filter.clamp(0, r * 10 - 3 + pattern(angle + 0.26179), 1);
-                g = jsfx.Filter.clamp(0, g * 10 - 3 + pattern(angle + 1.30899), 1);
-                b = jsfx.Filter.clamp(0, b * 10 - 3 + pattern(angle), 1);
-                // k = clamp(k * 10.0 - 5.0 + pattern(angle + 0.78539), 0.0, 1.0);
-                k = jsfx.Filter.clamp(0, k * 10 - 5 + pattern(angle + 0.78539), 1);
-                // gl_FragColor = vec4(1.0 - cmy - k, color.a);
+                r = filter.Filter.clamp(0, r * 10 - 3 + pattern(angle + 0.26179), 1);
+                g = filter.Filter.clamp(0, g * 10 - 3 + pattern(angle + 1.30899), 1);
+                b = filter.Filter.clamp(0, b * 10 - 3 + pattern(angle), 1);
+                k = filter.Filter.clamp(0, k * 10 - 5 + pattern(angle + 0.78539), 1);
                 helper.r = 1 - r - k;
                 helper.g = 1 - g - k;
                 helper.b = 1 - b - k;
             };
             return ColorHalfTone;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.ColorHalfTone = ColorHalfTone;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -591,17 +490,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter           Contrast
-         * @description      Provides multiplicative contrast control.
-         * @param contrast   -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
-         */
         var Contrast = (function (_super) {
             __extends(Contrast, _super);
             function Contrast(contrast) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float contrast;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                if (contrast > 0.0) {\n                    color.rgb = (color.rgb - 0.5) / (1.0 - contrast) + 0.5;\n                } else {\n                    color.rgb = (color.rgb - 0.5) * (1.0 + contrast) + 0.5;\n                }\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.contrast = jsfx.Filter.clamp(-1, contrast, 1) || 0;
+                this.properties.contrast = filter.Filter.clamp(-1, contrast, 1) || 0;
             }
             Contrast.prototype.iterateCanvas = function (helper) {
                 var contrast = this.properties.contrast;
@@ -617,7 +510,7 @@ var jsfx;
                 }
             };
             return Contrast;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Contrast = Contrast;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -625,25 +518,6 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter      Curves
-         * @description A powerful mapping tool that transforms the colors in the image
-         *              by an arbitrary function. The function is interpolated between
-         *              a set of 2D points using splines. The curves filter can take
-         *              either one or three arguments which will apply the mapping to
-         *              either luminance or RGB values, respectively.
-         * @param red   A list of points that define the function for the red channel.
-         *              Each point is a list of two values: the value before the mapping
-         *              and the value after the mapping, both in the range 0 to 1. For
-         *              example, [[0,1], [1,0]] would invert the red channel while
-         *              [[0,0], [1,1]] would leave the red channel unchanged. If green
-         *              and blue are omitted then this argument also applies to the
-         *              green and blue channels.
-         * @param green (optional) A list of points that define the function for the green
-         *              channel (just like for red).
-         * @param blue  (optional) A list of points that define the function for the blue
-         *              channel (just like for red).
-         */
         var Curves = (function (_super) {
             __extends(Curves, _super);
             function Curves(red, green, blue) {
@@ -651,7 +525,6 @@ var jsfx;
                 this.red = red;
                 this.green = green;
                 this.blue = blue;
-                // interpolate
                 red = Curves.splineInterpolate(red);
                 if (arguments.length == 1) {
                     green = blue = red;
@@ -665,24 +538,17 @@ var jsfx;
                 this.blue = blue;
             }
             Curves.prototype.drawWebGL = function (renderer) {
-                // create texture data
                 var array = [];
                 for (var i = 0; i < 256; i++) {
                     array.splice(array.length, 0, this.red[i], this.green[i], this.blue[i], 255);
                 }
-                // create a new texture
                 var extraTexture = renderer.createTexture();
-                // set ramp texture data
                 extraTexture.initFromBytes(256, 1, array);
-                // use the texture
                 extraTexture.use(1);
-                // get the shader
                 var shader = renderer.getShader(this);
-                // set shader textures
                 shader.textures({
                     map: 1
                 });
-                // render
                 renderer.getTexture().use();
                 renderer.getNextTexture().drawTo(function () {
                     shader.uniforms({}).drawRect();
@@ -698,12 +564,12 @@ var jsfx;
                 var interpolator = new jsfx.util.SplineInterpolator(points);
                 var array = [];
                 for (var i = 0; i < 256; i++) {
-                    array.push(jsfx.Filter.clamp(0, Math.floor(interpolator.interpolate(i / 255) * 256), 255));
+                    array.push(filter.Filter.clamp(0, Math.floor(interpolator.interpolate(i / 255) * 256), 255));
                 }
                 return array;
             };
             return Curves;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Curves = Curves;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -711,27 +577,15 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @todo While this filter is fast in WebGL, it is terribly slow in Canvas due to the complexity of the 9x9 box filter.
-         *
-         * @filter         Denoise
-         * @description    Smooths over grainy noise in dark images using an 9x9 box filter
-         *                 weighted by color intensity, similar to a bilateral filter.
-         * @param exponent The exponent of the color intensity difference, should be greater
-         *                 than zero. A value of zero just gives an 9x9 box blur and high values
-         *                 give the original image, but ideal values are usually around 10-20.
-         */
         var Denoise = (function (_super) {
             __extends(Denoise, _super);
             function Denoise(exponent) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float exponent;\n            uniform float strength;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 center = texture2D(texture, texCoord);\n                vec4 color = vec4(0.0);\n                float total = 0.0;\n\n                for (float x = -4.0; x <= 4.0; x += 1.0) {\n                    for (float y = -4.0; y <= 4.0; y += 1.0) {\n                        vec4 sample = texture2D(texture, texCoord + vec2(x, y) / texSize);\n                        float weight = 1.0 - abs(dot(sample.rgb - center.rgb, vec3(0.25)));\n                        weight = pow(weight, exponent);\n                        color += sample * weight;\n                        total += weight;\n                    }\n                }\n\n                gl_FragColor = color / total;\n            }\n        ");
-                // set properties
                 this.properties.exponent = exponent;
             }
             Denoise.prototype.drawWebGL = function (renderer) {
                 var shader = renderer.getShader(this);
                 var properties = this.getProperties();
-                // add texture size
                 properties.texSize = [renderer.getSource().width, renderer.getSource().width];
                 renderer.getTexture().use();
                 renderer.getNextTexture().drawTo(function () {
@@ -743,7 +597,6 @@ var jsfx;
                 var imageData = renderer.getImageData();
                 var pixels = imageData.data;
                 var original = new Uint8ClampedArray(imageData.data);
-                // variables
                 var x, y, dstOff, color, total, cx, cy, scx, scy, srcOff, weight;
                 for (x = 0; x < imageData.width; x++) {
                     for (y = 0; y < imageData.height; y++) {
@@ -755,11 +608,9 @@ var jsfx;
                                 scx = Math.min(imageData.width - 1, Math.max(0, x + cx));
                                 scy = Math.min(imageData.height - 1, Math.max(0, y + cy));
                                 srcOff = (scx + scy * imageData.width) * 4;
-                                // calculate the weight
                                 weight = Math.pow(1.0 - Math.abs((original[srcOff] / 255 - original[dstOff] / 255) * 0.25
                                     + (original[srcOff + 1] / 255 - original[dstOff + 1] / 255) * 0.25
                                     + (original[srcOff + 2] / 255 - original[dstOff + 2] / 255) * 0.25), exponent);
-                                // color += sample * weight
                                 color[0] += original[srcOff] / 255 * weight;
                                 color[1] += original[srcOff + 1] / 255 * weight;
                                 color[2] += original[srcOff + 2] / 255 * weight;
@@ -775,7 +626,7 @@ var jsfx;
                 }
             };
             return Denoise;
-        })(jsfx.Filter);
+        })(filter.Filter);
         filter.Denoise = Denoise;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -783,30 +634,18 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter        Color Halftone
-         * @description   Simulates a CMYK halftone rendering of the image by multiplying pixel values
-         *                with a four rotated 2D sine wave patterns, one each for cyan, magenta, yellow,
-         *                and black.
-         * @param centerX The x coordinate of the pattern origin.
-         * @param centerY The y coordinate of the pattern origin.
-         * @param angle   The rotation of the pattern in radians.
-         * @param size    The diameter of a dot in pixels.
-         */
         var DotScreen = (function (_super) {
             __extends(DotScreen, _super);
             function DotScreen(centerX, centerY, angle, size) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform vec2 center;\n            uniform float angle;\n            uniform float scale;\n            uniform vec2 texSize;\n            varying vec2 texCoord;\n\n            float pattern() {                float s = sin(angle), c = cos(angle);\n                vec2 tex = texCoord * texSize - center;\n                vec2 point = vec2(\n                    c * tex.x - s * tex.y,\n                    s * tex.x + c * tex.y\n                ) * scale;\n\n                return (sin(point.x) * sin(point.y)) * 4.0;\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float average = (color.r + color.g + color.b) / 3.0;\n                gl_FragColor = vec4(vec3(average * 10.0 - 5.0 + pattern()), color.a);\n            }\n        ");
                 this.centerX = centerX;
                 this.centerY = centerY;
-                // set properties
-                this.properties.angle = jsfx.Filter.clamp(0, angle, Math.PI / 2);
+                this.properties.angle = filter.Filter.clamp(0, angle, Math.PI / 2);
                 this.properties.scale = Math.PI / size;
             }
             DotScreen.prototype.drawWebGL = function (renderer) {
                 var shader = renderer.getShader(this);
                 var properties = this.getProperties();
-                // add texture size
                 properties.texSize = [renderer.getSource().width, renderer.getSource().width];
                 properties.center = [this.centerX, this.centerY];
                 renderer.getTexture().use();
@@ -818,9 +657,7 @@ var jsfx;
                 var imageData = helper.getImageData();
                 var x = (helper.getIndex() / 4) % imageData.width;
                 var y = Math.floor((helper.getIndex() / 4) / imageData.width);
-                // float average = (color.r + color.g + color.b) / 3.0;
                 var average = (helper.r + helper.g + helper.b) / 3;
-                // gl_FragColor = vec4(vec3(average * 10.0 - 5.0 + pattern()), color.a);
                 var pattern = filter.ColorHalfTone.pattern(this.properties.angle, x, y, this.centerX, this.centerY, this.properties.scale);
                 var value = average * 10 - 5 + pattern;
                 helper.r = value;
@@ -828,7 +665,7 @@ var jsfx;
                 helper.b = value;
             };
             return DotScreen;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.DotScreen = DotScreen;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -836,22 +673,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter           Hue / Saturation
-         * @description      Provides rotational hue control. RGB color space
-         *                   can be imagined as a cube where the axes are the red, green, and blue color
-         *                   values. Hue changing works by rotating the color vector around the grayscale
-         *                   line, which is the straight line from black (0, 0, 0) to white (1, 1, 1).
-         * @param hue        -1 to 1 (-1 is 180 degree rotation in the negative direction, 0 is no change,
-         *                   and 1 is 180 degree rotation in the positive direction)
-         */
         var Hue = (function (_super) {
             __extends(Hue, _super);
             function Hue(hue) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float hue;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                /* hue adjustment, wolfram alpha: RotationTransform[angle, {1, 1, 1}][{x, y, z}] */\n                float angle = hue * 3.14159265;\n                float s = sin(angle), c = cos(angle);\n                vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;\n                color.rgb = vec3(\n                    dot(color.rgb, weights.xyz),\n                    dot(color.rgb, weights.zxy),\n                    dot(color.rgb, weights.yzx)\n                );\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.hue = jsfx.Filter.clamp(-1, hue, 1) || 0;
-                // pre-calculate data for canvas iteration
+                this.properties.hue = filter.Filter.clamp(-1, hue, 1) || 0;
                 var angle = hue * 3.14159265;
                 var sin = Math.sin(angle);
                 var cos = Math.cos(angle);
@@ -866,7 +692,7 @@ var jsfx;
                 helper.b = rgb.dotScalars(this.weights.y, this.weights.z, this.weights.x);
             };
             return Hue;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Hue = Hue;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -874,9 +700,6 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter           Multiply
-         */
         var Multiply = (function (_super) {
             __extends(Multiply, _super);
             function Multiply(r, g, b) {
@@ -884,10 +707,9 @@ var jsfx;
                 this.r = r;
                 this.g = g;
                 this.b = b;
-                // set properties
-                this.properties.r = jsfx.Filter.clamp(0, r, 1);
-                this.properties.g = jsfx.Filter.clamp(0, g, 1);
-                this.properties.b = jsfx.Filter.clamp(0, b, 1);
+                this.properties.r = filter.Filter.clamp(0, r, 1);
+                this.properties.g = filter.Filter.clamp(0, g, 1);
+                this.properties.b = filter.Filter.clamp(0, b, 1);
             }
             Multiply.prototype.iterateCanvas = function (helper) {
                 helper.r *= this.properties.r;
@@ -895,7 +717,7 @@ var jsfx;
                 helper.b *= this.properties.b;
             };
             return Multiply;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Multiply = Multiply;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -903,17 +725,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter         Noise
-         * @description    Adds black and white noise to the image.
-         * @param amount   0 to 1 (0 for no effect, 1 for maximum noise)
-         */
         var Noise = (function (_super) {
             __extends(Noise, _super);
             function Noise(amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            float rand(vec2 co) {\n                return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n            }\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float diff = (rand(texCoord) - 0.5) * amount;\n                color.r += diff;\n                color.g += diff;\n                color.b += diff;\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
+                this.properties.amount = filter.Filter.clamp(0, amount, 1);
             }
             Noise.prototype.iterateCanvas = function (helper) {
                 var amount = this.properties.amount;
@@ -933,7 +749,7 @@ var jsfx;
                 return x - Math.floor(x);
             };
             return Noise;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Noise = Noise;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -941,21 +757,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter           Hue / Saturation
-         * @description      Provides multiplicative saturation control. RGB color space
-         *                   can be imagined as a cube where the axes are the red, green, and blue color
-         *                   values.
-         *                   Saturation is implemented by scaling all color channel values either toward
-         *                   or away from the average color channel value.
-         * @param saturation -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
-         */
         var Saturation = (function (_super) {
             __extends(Saturation, _super);
             function Saturation(saturation) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float saturation;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float average = (color.r + color.g + color.b) / 3.0;\n                if (saturation > 0.0) {\n                    color.rgb += (average - color.rgb) * (1.0 - 1.0 / (1.001 - saturation));\n                } else {\n                    color.rgb += (average - color.rgb) * (-saturation);\n                }\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.saturation = jsfx.Filter.clamp(-1, saturation, 1) || 0;
+                this.properties.saturation = filter.Filter.clamp(-1, saturation, 1) || 0;
             }
             Saturation.prototype.iterateCanvas = function (helper) {
                 var saturation = this.properties.saturation;
@@ -972,7 +778,7 @@ var jsfx;
                 }
             };
             return Saturation;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Saturation = Saturation;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -980,17 +786,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter         Sepia
-         * @description    Gives the image a reddish-brown monochrome tint that imitates an old photograph.
-         * @param amount   0 to 1 (0 for no effect, 1 for full sepia coloring)
-         */
         var Sepia = (function (_super) {
             __extends(Sepia, _super);
             function Sepia(amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float r = color.r;\n                float g = color.g;\n                float b = color.b;\n\n                color.r = min(1.0, (r * (1.0 - (0.607 * amount))) + (g * (0.769 * amount)) + (b * (0.189 * amount)));\n                color.g = min(1.0, (r * 0.349 * amount) + (g * (1.0 - (0.314 * amount))) + (b * 0.168 * amount));\n                color.b = min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount))));\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+                this.properties.amount = filter.Filter.clamp(-1, amount, 1) || 0;
             }
             Sepia.prototype.iterateCanvas = function (helper) {
                 var r = helper.r;
@@ -1002,7 +802,7 @@ var jsfx;
                 helper.b = Math.min(1.0, (r * 0.272 * amount) + (g * 0.534 * amount) + (b * (1.0 - (0.869 * amount))));
             };
             return Sepia;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Sepia = Sepia;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -1010,19 +810,10 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter         Unsharp Mask
-         * @description    A form of image sharpening that amplifies high-frequencies in the image. It
-         *                 is implemented by scaling pixels away from the average of their neighbors.
-         * @param radius   0 to 180 - The blur radius that calculates the average of the neighboring pixels.
-         * @param strength A scale factor where 0 is no effect and higher values cause a stronger effect.
-         * @note           Could potentially be converted to an IterableFilter, but we somehow need the original ImageData
-         */
         var UnsharpMask = (function (_super) {
             __extends(UnsharpMask, _super);
             function UnsharpMask(radius, strength) {
                 _super.call(this, null, "\n            uniform sampler2D blurredTexture;\n            uniform sampler2D originalTexture;\n            uniform float strength;\n            uniform float threshold;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 blurred = texture2D(blurredTexture, texCoord);\n                vec4 original = texture2D(originalTexture, texCoord);\n                gl_FragColor = mix(blurred, original, 1.0 + strength);\n            }\n        ");
-                // set properties
                 this.properties.radius = radius;
                 this.properties.strength = strength;
             }
@@ -1030,17 +821,12 @@ var jsfx;
                 var shader = renderer.getShader(this);
                 var radius = this.properties.radius;
                 var strength = this.properties.strength;
-                // create a new texture
                 var extraTexture = renderer.createTexture();
-                // use a texture and draw to it
                 renderer.getTexture().use();
                 extraTexture.drawTo(renderer.getDefaultShader().drawRect.bind(renderer.getDefaultShader()));
-                // blur current texture
                 extraTexture.use(1);
-                // draw the blur
                 var blur = new filter.Blur(radius);
                 blur.drawWebGL(renderer);
-                // use the stored texture to detect edges
                 shader.textures({
                     originalTexture: 1
                 });
@@ -1052,13 +838,10 @@ var jsfx;
             };
             UnsharpMask.prototype.drawCanvas = function (renderer) {
                 var original = new Uint8ClampedArray(renderer.getImageData().data);
-                // props
                 var radius = this.properties.radius;
                 var strength = this.properties.strength + 1;
-                // blur image
                 var blur = new filter.Blur(radius);
                 blur.drawCanvas(renderer);
-                // get processed image data
                 var imageData = renderer.getImageData();
                 var pixels = imageData.data;
                 for (var i = 0; i < pixels.length; i += 4) {
@@ -1069,7 +852,7 @@ var jsfx;
                 renderer.setImageData(imageData);
             };
             return UnsharpMask;
-        })(jsfx.Filter);
+        })(filter.Filter);
         filter.UnsharpMask = UnsharpMask;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -1077,17 +860,11 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter       Vibrance
-         * @description  Modifies the saturation of desaturated colors, leaving saturated colors unmodified.
-         * @param amount -1 to 1 (-1 is minimum vibrance, 0 is no change, and 1 is maximum vibrance)
-         */
         var Vibrance = (function (_super) {
             __extends(Vibrance, _super);
             function Vibrance(amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float amount;\n            varying vec2 texCoord;\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n                float average = (color.r + color.g + color.b) / 3.0;\n                float mx = max(color.r, max(color.g, color.b));\n                float amt = (mx - average) * (-amount * 3.0);\n                color.rgb = mix(color.rgb, vec3(mx), amt);\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.amount = jsfx.Filter.clamp(-1, amount, 1);
+                this.properties.amount = filter.Filter.clamp(-1, amount, 1);
             }
             Vibrance.prototype.iterateCanvas = function (helper) {
                 var amount = this.properties.amount;
@@ -1096,7 +873,7 @@ var jsfx;
                 helper.mix(mx, mx, mx, (mx - average) * (-amount * 3.0));
             };
             return Vibrance;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Vibrance = Vibrance;
     })(filter = jsfx.filter || (jsfx.filter = {}));
 })(jsfx || (jsfx = {}));
@@ -1104,19 +881,12 @@ var jsfx;
 (function (jsfx) {
     var filter;
     (function (filter) {
-        /**
-         * @filter         Vignette
-         * @description    Adds a simulated lens edge darkening effect.
-         * @param size     0 to 1 (0 for center of frame, 1 for edge of frame)
-         * @param amount   0 to 1 (0 for no effect, 1 for maximum lens darkening)
-         */
         var Vignette = (function (_super) {
             __extends(Vignette, _super);
             function Vignette(size, amount) {
                 _super.call(this, null, "\n            uniform sampler2D texture;\n            uniform float size;\n            uniform float amount;\n            varying vec2 texCoord;\n\n            void main() {\n                vec4 color = texture2D(texture, texCoord);\n\n                float dist = distance(texCoord, vec2(0.5, 0.5));\n                color.rgb *= smoothstep(0.8, size * 0.799, dist * (amount + size));\n\n                gl_FragColor = color;\n            }\n        ");
-                // set properties
-                this.properties.size = jsfx.Filter.clamp(0, size, 1);
-                this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
+                this.properties.size = filter.Filter.clamp(0, size, 1);
+                this.properties.amount = filter.Filter.clamp(0, amount, 1);
             }
             Vignette.prototype.iterateCanvas = function (helper) {
                 var size = this.properties.size;
@@ -1138,9 +908,55 @@ var jsfx;
                 return x * x * (3 - 2 * x);
             };
             return Vignette;
-        })(jsfx.IterableFilter);
+        })(filter.IterableFilter);
         filter.Vignette = Vignette;
     })(filter = jsfx.filter || (jsfx.filter = {}));
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var hasWebGL = (function () {
+        try {
+            var canvas = document.createElement("canvas");
+            return !!(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+        }
+        catch (e) {
+            return false;
+        }
+    })();
+    function Renderer(type) {
+        if (!type) {
+            type = hasWebGL ? "webgl" : "canvas";
+        }
+        if (type === "webgl") {
+            return new jsfx.webgl.Renderer();
+        }
+        return new jsfx.canvas.Renderer();
+    }
+    jsfx.Renderer = Renderer;
+})(jsfx || (jsfx = {}));
+var jsfx;
+(function (jsfx) {
+    var Source = (function () {
+        function Source(element) {
+            this.element = element;
+        }
+        Object.defineProperty(Source.prototype, "width", {
+            get: function () {
+                return this.element.width;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Source.prototype, "height", {
+            get: function () {
+                return this.element.height;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Source;
+    })();
+    jsfx.Source = Source;
 })(jsfx || (jsfx = {}));
 var jsfx;
 (function (jsfx) {
@@ -1175,14 +991,6 @@ var jsfx;
                 this.g = v.y;
                 this.b = v.z;
             };
-            /**
-             * mix(x, y, a) = x * (1 - a) + y * a
-             *
-             * @param r
-             * @param g
-             * @param b
-             * @param a
-             */
             ImageDataHelper.prototype.mix = function (r, g, b, a) {
                 this.r = ImageDataHelper.mix(this.r, r, a);
                 this.g = ImageDataHelper.mix(this.g, g, a);
@@ -1200,9 +1008,6 @@ var jsfx;
 (function (jsfx) {
     var util;
     (function (util) {
-        /**
-         * From SplineInterpolator.cs in the Paint.NET source code
-         */
         var SplineInterpolator = (function () {
             function SplineInterpolator(points) {
                 this.points = points;
@@ -1222,8 +1027,6 @@ var jsfx;
                 this.u[0] = 0;
                 this.y2[0] = 0;
                 for (i = 1; i < n - 1; ++i) {
-                    // This is the decomposition loop of the tri-diagonal algorithm.
-                    // y2 and u are used for temporary storage of the decomposed factors.
                     var wx = this.xa[i + 1] - this.xa[i - 1];
                     var sig = (this.xa[i] - this.xa[i - 1]) / wx;
                     var p = sig * this.y2[i - 1] + 2.0;
@@ -1233,7 +1036,6 @@ var jsfx;
                     this.u[i] = (6.0 * ddydx / wx - sig * this.u[i - 1]) / p;
                 }
                 this.y2[n - 1] = 0;
-                // This is the back-substitution loop of the tri-diagonal algorithm
                 for (i = n - 2; i >= 0; --i) {
                     this.y2[i] = this.y2[i] * this.y2[i + 1] + this.u[i];
                 }
@@ -1242,11 +1044,6 @@ var jsfx;
                 var n = this.ya.length;
                 var klo = 0;
                 var khi = n - 1;
-                // We will find the right place in the table by means of
-                // bisection. This is optimal if sequential calls to this
-                // routine are at random values of x. If sequential calls
-                // are in order, and closely spaced, one would do better
-                // to store previous values of klo and khi.
                 while (khi - klo > 1) {
                     var k = (khi + klo) >> 1;
                     if (this.xa[k] > x) {
@@ -1259,7 +1056,6 @@ var jsfx;
                 var h = this.xa[khi] - this.xa[klo];
                 var a = (this.xa[khi] - x) / h;
                 var b = (x - this.xa[klo]) / h;
-                // Cubic spline polynomial is now evaluated.
                 return a * this.ya[klo] + b * this.ya[khi] +
                     ((a * a * a - a) * this.y2[klo] + (b * b * b - b) * this.y2[khi]) * (h * h) / 6.0;
             };
@@ -1268,10 +1064,6 @@ var jsfx;
         util.SplineInterpolator = SplineInterpolator;
     })(util = jsfx.util || (jsfx.util = {}));
 })(jsfx || (jsfx = {}));
-/**
- * Vector2 Utility Class
- *  -> Taken from https://github.com/mrdoob/three.js/blob/master/src/math/Vector2.js with only the functions we need.
- */
 var jsfx;
 (function (jsfx) {
     var util;
@@ -1289,10 +1081,6 @@ var jsfx;
         util.Vector2 = Vector2;
     })(util = jsfx.util || (jsfx.util = {}));
 })(jsfx || (jsfx = {}));
-/**
- * Vector3 Utility Class
- *  -> Taken from https://github.com/mrdoob/three.js/blob/master/src/math/Vector3.js with only the functions we need.
- */
 var jsfx;
 (function (jsfx) {
     var util;
@@ -1352,26 +1140,19 @@ var jsfx;
                 this.canvas = document.createElement("canvas");
                 this.gl = this.canvas.getContext("experimental-webgl", { premultipliedAlpha: false });
                 this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-                // variables to store the source
                 this.source = null;
                 this.sourceTexture = null;
-                // store the textures and buffers
                 this.textures = null;
                 this.currentTexture = 0;
-                // initialize a shader cache
                 this.gl.shaderCache = {};
             }
             Renderer.prototype.setSource = function (source) {
-                // first, clean up
                 if (this.source) {
                     this.cleanUp();
                 }
-                // re-initialize renderer for rendering with new source
                 this.source = source;
-                this.sourceTexture = jsfx.webgl.Texture.fromElement(this.gl, source.element);
-                // initialize the renderer textures
+                this.sourceTexture = webgl.Texture.fromElement(this.gl, source.element);
                 this.initialize();
-                // draw the source texture onto the first texture
                 this.sourceTexture.use();
                 this.getTexture().drawTo(this.getDefaultShader().drawRect.bind(this.getDefaultShader()));
                 return this;
@@ -1404,30 +1185,29 @@ var jsfx;
                 return this.textures[++this.currentTexture % 2];
             };
             Renderer.prototype.createTexture = function () {
-                return new jsfx.webgl.Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+                return new webgl.Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
             };
             Renderer.prototype.getShader = function (filter) {
                 var cacheKey = filter.getVertexSource() + filter.getFragmentSource();
                 return this.gl.shaderCache.hasOwnProperty(cacheKey) ?
                     this.gl.shaderCache[cacheKey] :
-                    new jsfx.webgl.Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
+                    new webgl.Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
             };
             Renderer.prototype.getDefaultShader = function () {
                 if (!this.gl.shaderCache.def) {
-                    this.gl.shaderCache.def = new jsfx.webgl.Shader(this.gl);
+                    this.gl.shaderCache.def = new webgl.Shader(this.gl);
                 }
                 return this.gl.shaderCache.def;
             };
             Renderer.prototype.getFlippedShader = function () {
                 if (!this.gl.shaderCache.flipped) {
-                    this.gl.shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, "\n                uniform sampler2D texture;\n                varying vec2 texCoord;\n\n                void main() {\n                    gl_FragColor = texture2D(texture, vec2(texCoord.x, 1.0 - texCoord.y));\n                }\n            ");
+                    this.gl.shaderCache.flipped = new webgl.Shader(this.gl, null, "\n                uniform sampler2D texture;\n                varying vec2 texCoord;\n\n                void main() {\n                    gl_FragColor = texture2D(texture, vec2(texCoord.x, 1.0 - texCoord.y));\n                }\n            ");
                 }
                 return this.gl.shaderCache.flipped;
             };
             Renderer.prototype.initialize = function () {
                 this.canvas.width = this.source.width;
                 this.canvas.height = this.source.height;
-                // initialize the textures
                 var textures = [];
                 for (var i = 0; i < 2; i++) {
                     textures.push(this.createTexture());
@@ -1435,13 +1215,10 @@ var jsfx;
                 this.textures = textures;
             };
             Renderer.prototype.cleanUp = function () {
-                // destroy source texture
                 this.sourceTexture.destroy();
-                // destroy textures used for filters
                 for (var i = 0; i < 2; i++) {
                     this.textures[i].destroy();
                 }
-                // re-set textures
                 this.textures = null;
             };
             return Renderer;
@@ -1456,32 +1233,19 @@ var jsfx;
         var Shader = (function () {
             function Shader(gl, vertexSource, fragmentSource) {
                 this.gl = gl;
-                // get the shader source
                 this.vertexSource = vertexSource || Shader.defaultVertexSource;
                 this.fragmentSource = fragmentSource || Shader.defaultFragmentSource;
-                // set precision
                 this.fragmentSource = "precision highp float;" + this.fragmentSource;
-                // init vars
                 this.vertexAttribute = null;
                 this.texCoordAttribute = null;
-                // create the program
                 this.program = gl.createProgram();
-                // attach the shaders
                 gl.attachShader(this.program, compileSource(gl, gl.VERTEX_SHADER, this.vertexSource));
                 gl.attachShader(this.program, compileSource(gl, gl.FRAGMENT_SHADER, this.fragmentSource));
-                // link the program and ensure it worked
                 gl.linkProgram(this.program);
                 if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
                     throw "link error: " + gl.getProgramInfoLog(this.program);
                 }
             }
-            /**
-             * textures are uniforms too but for some reason can't be specified by this.gl.uniform1f,
-             * even though floating point numbers represent the integers 0 through 7 exactly
-             *
-             * @param textures
-             * @returns {Shader}
-             */
             Shader.prototype.textures = function (textures) {
                 this.gl.useProgram(this.program);
                 for (var name in textures) {
@@ -1500,7 +1264,6 @@ var jsfx;
                     }
                     var location = this.gl.getUniformLocation(this.program, name);
                     if (location === null) {
-                        // will be null if the uniform isn't used in the shader
                         continue;
                     }
                     var value = uniforms[name];
@@ -1538,7 +1301,6 @@ var jsfx;
                 return this;
             };
             Shader.prototype.drawRect = function (left, top, right, bottom) {
-                var undefined;
                 var viewport = this.gl.getParameter(this.gl.VIEWPORT);
                 top = top !== undefined ? (top - viewport[1]) / viewport[3] : 0;
                 left = left !== undefined ? (left - viewport[0]) / viewport[2] : 0;
@@ -1643,19 +1405,14 @@ var jsfx;
                 this.gl.bindTexture(this.gl.TEXTURE_2D, null);
             };
             Texture.prototype.drawTo = function (callback) {
-                // create and bind frame buffer
                 this.gl.frameBuffer = this.gl.frameBuffer || this.gl.createFramebuffer();
                 this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.gl.frameBuffer);
                 this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.id, 0);
-                // ensure there was no error
                 if (this.gl.checkFramebufferStatus(this.gl.FRAMEBUFFER) !== this.gl.FRAMEBUFFER_COMPLETE) {
                     throw new Error("incomplete framebuffer");
                 }
-                // set the viewport
                 this.gl.viewport(0, 0, this.width, this.height);
-                // do the drawing
                 callback();
-                // stop rendering to this texture
                 this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
             };
             Texture.prototype.destroy = function () {
@@ -1672,6 +1429,3 @@ var jsfx;
         webgl.Texture = Texture;
     })(webgl = jsfx.webgl || (jsfx.webgl = {}));
 })(jsfx || (jsfx = {}));
-if (typeof module !== 'undefined') {
-    module.exports = jsfx;
-}
