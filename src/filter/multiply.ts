@@ -2,7 +2,7 @@ namespace jsfx.filter {
   /**
    * @filter           Multiply
    */
-  export class Multiply extends jsfx.IterableFilter {
+  export class Multiply extends IterableFilter {
     constructor(protected r : number, protected g : number, protected b : number) {
       super(null, `
             uniform sampler2D texture;
@@ -22,9 +22,9 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.r = jsfx.Filter.clamp(0, r, 1);
-      this.properties.g = jsfx.Filter.clamp(0, g, 1);
-      this.properties.b = jsfx.Filter.clamp(0, b, 1);
+      this.properties.r = Filter.clamp(0, r, 1);
+      this.properties.g = Filter.clamp(0, g, 1);
+      this.properties.b = Filter.clamp(0, b, 1);
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

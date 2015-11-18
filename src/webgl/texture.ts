@@ -27,7 +27,7 @@ namespace jsfx.webgl {
       this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.format, this.format, this.type, element);
     }
 
-    public initFromBytes(width : number, height : number, data) : void {
+    public initFromBytes(width : number, height : number, data : any) : void {
       this.width = width;
       this.height = height;
       this.format = this.gl.RGBA;
@@ -73,7 +73,7 @@ namespace jsfx.webgl {
       this.id = null;
     }
 
-    static fromElement(gl : WebGLRenderingContext, element : HTMLImageElement) : jsfx.webgl.Texture {
+    static fromElement(gl : WebGLRenderingContext, element : HTMLImageElement) : Texture {
       var texture = new Texture(gl, 0, 0);
       texture.loadContentsOf(element);
 

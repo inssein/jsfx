@@ -3,8 +3,8 @@ namespace jsfx.webgl {
     private canvas : HTMLCanvasElement;
     private gl : WebGLRenderingContext;
     private source : jsfx.Source;
-    private sourceTexture : jsfx.webgl.Texture;
-    private textures : Array<jsfx.webgl.Texture>;
+    private sourceTexture : Texture;
+    private textures : Texture[];
     private currentTexture : number;
 
     constructor() {
@@ -32,7 +32,7 @@ namespace jsfx.webgl {
 
       // re-initialize renderer for rendering with new source
       this.source = source;
-      this.sourceTexture = jsfx.webgl.Texture.fromElement(this.gl, source.element);
+      this.sourceTexture = Texture.fromElement(this.gl, source.element);
 
       // initialize the renderer textures
       this.initialize();
@@ -48,14 +48,14 @@ namespace jsfx.webgl {
       return this.source;
     }
 
-    public applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
+    public applyFilter(filter : jsfx.filter.FilterInterface) : jsfx.RendererInterface {
       filter.drawWebGL(this);
 
       return this;
     }
 
-    public applyFilters(filters : jsfx.FilterInterface[]) : jsfx.RendererInterface {
-      filters.forEach((filter : jsfx.FilterInterface) => {
+    public applyFilters(filters : jsfx.filter.FilterInterface[]) : jsfx.RendererInterface {
+      filters.forEach((filter : jsfx.filter.FilterInterface) => {
         filter.drawWebGL(this);
       });
 
@@ -71,37 +71,37 @@ namespace jsfx.webgl {
       return this.canvas;
     }
 
-    public getTexture() : jsfx.webgl.Texture {
+    public getTexture() : Texture {
       return this.textures[this.currentTexture % 2];
     }
 
-    public getNextTexture() : jsfx.webgl.Texture {
+    public getNextTexture() : Texture {
       return this.textures[++this.currentTexture % 2];
     }
 
-    public createTexture() : jsfx.webgl.Texture {
-      return new jsfx.webgl.Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+    public createTexture() : Texture {
+      return new Texture(this.gl, this.source.width, this.source.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
 
-    public getShader(filter : jsfx.FilterInterface) : jsfx.webgl.Shader {
+    public getShader(filter : jsfx.filter.FilterInterface) : Shader {
       var cacheKey = filter.getVertexSource() + filter.getFragmentSource();
 
       return (<any>this.gl).shaderCache.hasOwnProperty(cacheKey) ?
         (<any>this.gl).shaderCache[cacheKey] :
-        new jsfx.webgl.Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
+        new Shader(this.gl, filter.getVertexSource(), filter.getFragmentSource());
     }
 
-    public getDefaultShader() : jsfx.webgl.Shader {
+    public getDefaultShader() : Shader {
       if (!(<any>this.gl).shaderCache.def) {
-        (<any>this.gl).shaderCache.def = new jsfx.webgl.Shader(this.gl);
+        (<any>this.gl).shaderCache.def = new Shader(this.gl);
       }
 
       return (<any>this.gl).shaderCache.def;
     }
 
-    public getFlippedShader() : jsfx.webgl.Shader {
+    public getFlippedShader() : Shader {
       if (!(<any>this.gl).shaderCache.flipped) {
-        (<any>this.gl).shaderCache.flipped = new jsfx.webgl.Shader(this.gl, null, `
+        (<any>this.gl).shaderCache.flipped = new Shader(this.gl, null, `
                 uniform sampler2D texture;
                 varying vec2 texCoord;
 
@@ -119,7 +119,7 @@ namespace jsfx.webgl {
       this.canvas.height = this.source.height;
 
       // initialize the textures
-      var textures = [];
+      var textures : Texture[] = [];
 
       for (var i = 0; i < 2; i++) {
         textures.push(this.createTexture());

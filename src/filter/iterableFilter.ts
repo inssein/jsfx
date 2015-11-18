@@ -1,5 +1,5 @@
-namespace jsfx {
-  export class IterableFilter extends jsfx.Filter implements jsfx.IterableFilterInterface {
+namespace jsfx.filter {
+  export class IterableFilter extends Filter implements IterableFilterInterface {
     public drawCanvas(renderer : jsfx.canvas.Renderer) : void {
       return IterableFilter.drawCanvas([this], renderer);
     }
@@ -8,14 +8,14 @@ namespace jsfx {
       throw new Error("Must be implemented");
     }
 
-    static drawCanvas(filters : jsfx.IterableFilterInterface[], renderer : jsfx.canvas.Renderer) : void {
+    static drawCanvas(filters : IterableFilterInterface[], renderer : jsfx.canvas.Renderer) : void {
       var helper : jsfx.util.ImageDataHelper;
       var imageData : ImageData = renderer.getImageData();
 
       for (var i = 0; i < imageData.data.length; i += 4) {
         helper = new jsfx.util.ImageDataHelper(imageData, i);
 
-        filters.forEach((filter : jsfx.IterableFilterInterface) => {
+        filters.forEach((filter : IterableFilterInterface) => {
           filter.iterateCanvas(helper);
         });
 

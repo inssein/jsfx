@@ -4,7 +4,7 @@ namespace jsfx.filter {
    * @description      Provides multiplicative contrast control.
    * @param contrast   -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
    */
-  export class Contrast extends jsfx.IterableFilter {
+  export class Contrast extends IterableFilter {
     constructor(contrast? : number) {
       super(null, `
             uniform sampler2D texture;
@@ -25,7 +25,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.contrast = jsfx.Filter.clamp(-1, contrast, 1) || 0;
+      this.properties.contrast = Filter.clamp(-1, contrast, 1) || 0;
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

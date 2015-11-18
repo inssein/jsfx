@@ -1,5 +1,5 @@
-declare var Buffer;
-declare var require;
+declare var Buffer : any;
+declare var require : any;
 
 namespace jsfx.canvas {
   export class Renderer implements jsfx.RendererInterface {
@@ -39,21 +39,21 @@ namespace jsfx.canvas {
       return this.source;
     }
 
-    public applyFilter(filter : jsfx.FilterInterface) : jsfx.RendererInterface {
+    public applyFilter(filter : jsfx.filter.FilterInterface) : jsfx.RendererInterface {
       filter.drawCanvas(this);
 
       return this;
     }
 
-    public applyFilters(filters : jsfx.FilterInterface[]) : jsfx.RendererInterface {
-      var stack : jsfx.IterableFilterInterface[] = [];
-      var filter : jsfx.FilterInterface;
+    public applyFilters(filters : jsfx.filter.FilterInterface[]) : jsfx.RendererInterface {
+      var stack : jsfx.filter.IterableFilterInterface[] = [];
+      var filter : jsfx.filter.FilterInterface;
 
       for (var i : number = 0; i < filters.length; i++) {
         filter = filters[i];
 
-        if (filter instanceof jsfx.IterableFilter) {
-          stack.push(<jsfx.IterableFilterInterface> filter);
+        if (filter instanceof jsfx.filter.IterableFilter) {
+          stack.push(<jsfx.filter.IterableFilterInterface> filter);
         } else {
           // if there if something in the stack, apply that first
           if (stack.length > 0) {
@@ -94,8 +94,8 @@ namespace jsfx.canvas {
       this.imageData = v;
     }
 
-    private applyFilterStack(stack : jsfx.IterableFilterInterface[]) {
-      jsfx.IterableFilter.drawCanvas(stack, this);
+    private applyFilterStack(stack : jsfx.filter.IterableFilterInterface[]) {
+      jsfx.filter.IterableFilter.drawCanvas(stack, this);
 
       return this;
     }

@@ -5,7 +5,7 @@ namespace jsfx.filter {
    *                 using StackBlur. The implementations are obviously very different, but the results are very close.
    * @param radius   The radius of the pyramid convolved with the image.
    */
-  export class Blur extends jsfx.Filter {
+  export class Blur extends Filter {
     constructor(radius? : number) {
       super(null, `
             uniform sampler2D texture;

@@ -9,7 +9,7 @@ namespace jsfx.filter {
    * @param strength A scale factor where 0 is no effect and higher values cause a stronger effect.
    * @note           Could potentially be converted to an IterableFilter, but we somehow need the original ImageData
    */
-  export class UnsharpMask extends jsfx.Filter {
+  export class UnsharpMask extends Filter {
     constructor(radius? : number, strength ? : number) {
       super(null, `
             uniform sampler2D blurredTexture;

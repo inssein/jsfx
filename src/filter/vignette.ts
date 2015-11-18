@@ -5,7 +5,7 @@ namespace jsfx.filter {
    * @param size     0 to 1 (0 for center of frame, 1 for edge of frame)
    * @param amount   0 to 1 (0 for no effect, 1 for maximum lens darkening)
    */
-  export class Vignette extends jsfx.IterableFilter {
+  export class Vignette extends IterableFilter {
     constructor(size : number, amount : number) {
       super(null, `
             uniform sampler2D texture;
@@ -24,8 +24,8 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.size = jsfx.Filter.clamp(0, size, 1);
-      this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
+      this.properties.size = Filter.clamp(0, size, 1);
+      this.properties.amount = Filter.clamp(0, amount, 1);
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {
@@ -48,7 +48,7 @@ namespace jsfx.filter {
       return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
-    protected static smoothstep(min, max, value) {
+    protected static smoothstep(min : number, max : number, value : number) {
       var x = Math.max(0, Math.min(1, (value - min) / (max - min)));
       return x * x * (3 - 2 * x);
     }

@@ -58,7 +58,7 @@ void main() {
      * @param textures
      * @returns {Shader}
      */
-    public textures(textures) {
+    public textures(textures : any) {
       this.gl.useProgram(this.program);
 
       for (var name in textures) {
@@ -72,7 +72,7 @@ void main() {
       return this;
     }
 
-    public uniforms(uniforms) {
+    public uniforms(uniforms : any) {
       this.gl.useProgram(this.program);
 
       for (var name in uniforms) {
@@ -86,7 +86,7 @@ void main() {
           continue;
         }
 
-        var value = uniforms[name];
+        var value : any = uniforms[name];
 
         if (isArray(value)) {
           switch (value.length) {
@@ -122,7 +122,6 @@ void main() {
     }
 
     public drawRect(left? : number, top? : number, right? : number, bottom? : number) {
-      var undefined;
       var viewport = this.gl.getParameter(this.gl.VIEWPORT);
 
       top = top !== undefined ? (top - viewport[1]) / viewport[3] : 0;
@@ -167,7 +166,7 @@ void main() {
     }
   }
 
-  function compileSource(gl, type, source) {
+  function compileSource(gl : any, type : any, source : any) {
     var shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
@@ -179,11 +178,11 @@ void main() {
     return shader;
   }
 
-  function isArray(obj) {
+  function isArray(obj : any) {
     return Object.prototype.toString.call(obj) === "[object Array]";
   }
 
-  function isNumber(obj) {
+  function isNumber(obj : any) {
     return Object.prototype.toString.call(obj) === "[object Number]";
   }
 }

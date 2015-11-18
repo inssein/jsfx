@@ -1,5 +1,7 @@
-namespace jsfx {
-  export class Filter implements jsfx.FilterInterface {
+/// <reference path="filterInterface.ts"/>
+
+namespace jsfx.filter {
+  export class Filter implements FilterInterface {
     protected properties : any = {};
 
     constructor(private vertexSource : string = null, private fragmentSource : string = null) {

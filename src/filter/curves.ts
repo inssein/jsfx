@@ -18,7 +18,7 @@ namespace jsfx.filter {
    * @param blue  (optional) A list of points that define the function for the blue
    *              channel (just like for red).
    */
-  export class Curves extends jsfx.IterableFilter {
+  export class Curves extends IterableFilter {
     constructor(private red : number[], private green : number[], private blue : number[]) {
       super(null, `
             uniform sampler2D texture;
@@ -51,9 +51,9 @@ namespace jsfx.filter {
 
     drawWebGL(renderer : jsfx.webgl.Renderer) : void {
       // create texture data
-      var array = [];
+      var array : any[] = [];
       for (var i = 0; i < 256; i++) {
-          array.splice(array.length, 0, this.red[i], this.green[i], this.blue[i], 255);
+        array.splice(array.length, 0, this.red[i], this.green[i], this.blue[i], 255);
       }
 
       // create a new texture
@@ -70,13 +70,13 @@ namespace jsfx.filter {
 
       // set shader textures
       shader.textures({
-          map: 1
+        map: 1
       });
 
       // render
       renderer.getTexture().use();
       renderer.getNextTexture().drawTo(function () {
-          shader.uniforms({}).drawRect();
+        shader.uniforms({}).drawRect();
       });
     }
 
@@ -88,9 +88,9 @@ namespace jsfx.filter {
       helper.b = this.blue[helper.b * 255] / 255;
     }
 
-    static splineInterpolate(points) {
-      var interpolator = new jsfx.util.SplineInterpolator(points);
-      var array = [];
+    static splineInterpolate(points : number[]) {
+      var interpolator : jsfx.util.SplineInterpolator = new jsfx.util.SplineInterpolator(points);
+      var array : number[] = [];
 
       for (var i = 0; i < 256; i++) {
         array.push(Filter.clamp(0, Math.floor(interpolator.interpolate(i / 255) * 256), 255));

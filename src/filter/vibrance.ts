@@ -4,7 +4,7 @@ namespace jsfx.filter {
    * @description  Modifies the saturation of desaturated colors, leaving saturated colors unmodified.
    * @param amount -1 to 1 (-1 is minimum vibrance, 0 is no change, and 1 is maximum vibrance)
    */
-  export class Vibrance extends jsfx.IterableFilter {
+  export class Vibrance extends IterableFilter {
     constructor(amount : number) {
       super(null, `
             uniform sampler2D texture;
@@ -21,7 +21,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.amount = jsfx.Filter.clamp(-1, amount, 1);
+      this.properties.amount = Filter.clamp(-1, amount, 1);
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

@@ -4,7 +4,7 @@ namespace jsfx.filter {
    * @description    Adds black and white noise to the image.
    * @param amount   0 to 1 (0 for no effect, 1 for maximum noise)
    */
-  export class Noise extends jsfx.IterableFilter {
+  export class Noise extends IterableFilter {
     constructor(amount : number) {
       super(null, `
             uniform sampler2D texture;
@@ -28,7 +28,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.amount = jsfx.Filter.clamp(0, amount, 1);
+      this.properties.amount = Filter.clamp(0, amount, 1);
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

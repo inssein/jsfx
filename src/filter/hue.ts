@@ -8,7 +8,7 @@ namespace jsfx.filter {
    * @param hue        -1 to 1 (-1 is 180 degree rotation in the negative direction, 0 is no change,
    *                   and 1 is 180 degree rotation in the positive direction)
    */
-  export class Hue extends jsfx.IterableFilter {
+  export class Hue extends IterableFilter {
     private weights : jsfx.util.Vector3;
 
     constructor(hue? : number) {
@@ -35,7 +35,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.hue = jsfx.Filter.clamp(-1, hue, 1) || 0;
+      this.properties.hue = Filter.clamp(-1, hue, 1) || 0;
 
       // pre-calculate data for canvas iteration
       var angle = hue * 3.14159265;

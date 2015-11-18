@@ -44,7 +44,7 @@ namespace jsfx.util {
       return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
-    dot(v) : number {
+    dot(v : Vector3) : number {
       return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 

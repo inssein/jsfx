@@ -1,4 +1,4 @@
-namespace jsfx {
+namespace jsfx.filter {
   export interface FilterInterface {
     getProperties() : Object;
     getVertexSource() : string;

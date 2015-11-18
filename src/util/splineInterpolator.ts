@@ -16,7 +16,7 @@ namespace jsfx.util {
       this.u = [];
       this.y2 = [];
 
-      points.sort(function (a, b) {
+      points.sort(function (a : any, b : any) {
         return a[0] - b[0];
       });
 
@@ -31,13 +31,13 @@ namespace jsfx.util {
       for (i = 1; i < n - 1; ++i) {
         // This is the decomposition loop of the tri-diagonal algorithm.
         // y2 and u are used for temporary storage of the decomposed factors.
-        var wx = this.xa[i + 1] - this.xa[i - 1];
-        var sig = (this.xa[i] - this.xa[i - 1]) / wx;
-        var p = sig * this.y2[i - 1] + 2.0;
+        var wx : number = this.xa[i + 1] - this.xa[i - 1];
+        var sig : number = (this.xa[i] - this.xa[i - 1]) / wx;
+        var p : number = sig * this.y2[i - 1] + 2.0;
 
         this.y2[i] = (sig - 1.0) / p;
 
-        var ddydx =
+        var ddydx : number =
           (this.ya[i + 1] - this.ya[i]) / (this.xa[i + 1] - this.xa[i]) -
           (this.ya[i] - this.ya[i - 1]) / (this.xa[i] - this.xa[i - 1]);
 
@@ -52,10 +52,10 @@ namespace jsfx.util {
       }
     }
 
-    interpolate(x) {
-      var n = this.ya.length;
-      var klo = 0;
-      var khi = n - 1;
+    interpolate(x : number) : number {
+      var n : number = this.ya.length;
+      var klo : number = 0;
+      var khi : number = n - 1;
 
       // We will find the right place in the table by means of
       // bisection. This is optimal if sequential calls to this
@@ -72,9 +72,9 @@ namespace jsfx.util {
         }
       }
 
-      var h = this.xa[khi] - this.xa[klo];
-      var a = (this.xa[khi] - x) / h;
-      var b = (x - this.xa[klo]) / h;
+      var h : number = this.xa[khi] - this.xa[klo];
+      var a : number = (this.xa[khi] - x) / h;
+      var b : number = (x - this.xa[klo]) / h;
 
       // Cubic spline polynomial is now evaluated.
       return a * this.ya[klo] + b * this.ya[khi] +

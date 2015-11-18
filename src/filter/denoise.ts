@@ -11,7 +11,7 @@ namespace jsfx.filter {
    *                 than zero. A value of zero just gives an 9x9 box blur and high values
    *                 give the original image, but ideal values are usually around 10-20.
    */
-  export class Denoise extends jsfx.Filter {
+  export class Denoise extends Filter {
     constructor(exponent : number) {
       super(null, `
             uniform sampler2D texture;

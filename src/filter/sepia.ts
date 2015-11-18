@@ -4,7 +4,7 @@ namespace jsfx.filter {
    * @description    Gives the image a reddish-brown monochrome tint that imitates an old photograph.
    * @param amount   0 to 1 (0 for no effect, 1 for full sepia coloring)
    */
-  export class Sepia extends jsfx.IterableFilter {
+  export class Sepia extends IterableFilter {
     constructor(amount? : number) {
       super(null, `
             uniform sampler2D texture;
@@ -26,7 +26,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.amount = jsfx.Filter.clamp(-1, amount, 1) || 0;
+      this.properties.amount = Filter.clamp(-1, amount, 1) || 0;
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

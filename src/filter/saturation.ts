@@ -8,7 +8,7 @@ namespace jsfx.filter {
    *                   or away from the average color channel value.
    * @param saturation -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
    */
-  export class Saturation extends jsfx.IterableFilter {
+  export class Saturation extends IterableFilter {
     constructor(saturation? : number) {
       super(null, `
             uniform sampler2D texture;
@@ -30,7 +30,7 @@ namespace jsfx.filter {
         `);
 
       // set properties
-      this.properties.saturation = jsfx.Filter.clamp(-1, saturation, 1) || 0;
+      this.properties.saturation = Filter.clamp(-1, saturation, 1) || 0;
     }
 
     public iterateCanvas(helper : jsfx.util.ImageDataHelper) : void {

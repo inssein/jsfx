@@ -9,7 +9,7 @@ namespace jsfx.filter {
    * @param angle   The rotation of the pattern in radians.
    * @param size    The diameter of a dot in pixels.
    */
-  export class DotScreen extends jsfx.IterableFilter {
+  export class DotScreen extends IterableFilter {
     constructor(protected centerX : number, protected centerY : number, angle : number, size : number) {
       super(null, `
             uniform sampler2D texture;
